@@ -1,0 +1,83 @@
+/* Theme Styles */
+
+/* Classic Dark Theme (default) */
+body[data-theme="classic"],
+body:not([data-theme]) {
+    --color-bg-primary: #0a0e27;
+    --color-bg-secondary: #151a35;
+    --color-bg-tertiary: #1e2544;
+    --color-accent-purple: #a855f7;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Ocean Blue Theme */
+body[data-theme="ocean"] {
+    --color-bg-primary: #0a1929;
+    --color-bg-secondary: #132f4c;
+    --color-bg-tertiary: #1e4976;
+    --color-accent-blue: #00d4ff;
+    --color-accent-purple: #00bcd4;
+    --color-border: rgba(0, 212, 255, 0.15);
+    --color-border-focus: rgba(0, 212, 255, 0.5);
+    --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    --gradient-board: linear-gradient(180deg, #1e4976 0%, #132f4c 100%);
+    --shadow-glow-purple: 0 0 30px rgba(0, 212, 255, 0.4);
+}
+
+/* Change body background for Ocean theme */
+body[data-theme="ocean"] {
+    background-image: radial-gradient(circle at 20% 50%,
+            rgba(14, 165, 233, 0.15) 0%,
+            transparent 50%),
+        radial-gradient(circle at 80% 80%,
+            rgba(6, 182, 212, 0.15) 0%,
+            transparent 50%);
+}
+
+/* Sunset Orange Theme */
+body[data-theme="sunset"] {
+    --color-bg-primary: #1a0f0a;
+    --color-bg-secondary: #2d1810;
+    --color-bg-tertiary: #4a2818;
+    --color-accent-purple: #ff6b35;
+    --color-accent-orange: #ff6b35;
+    --color-border: rgba(255, 107, 53, 0.15);
+    --color-border-focus: rgba(255, 107, 53, 0.5);
+    --gradient-primary: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    --gradient-board: linear-gradient(180deg, #4a2818 0%, #2d1810 100%);
+    --shadow-glow-purple: 0 0 30px rgba(255, 107, 53, 0.4);
+}
+
+/* Change body background for Sunset theme */
+body[data-theme="sunset"] {
+    background-image: radial-gradient(circle at 20% 50%,
+            rgba(249, 115, 22, 0.15) 0%,
+            transparent 50%),
+        radial-gradient(circle at 80% 80%,
+            rgba(234, 88, 12, 0.15) 0%,
+            transparent 50%);
+}
+
+/* Forest Green Theme */
+body[data-theme="forest"] {
+    --color-bg-primary: #0a1a0f;
+    --color-bg-secondary: #102d18;
+    --color-bg-tertiary: #184a28;
+    --color-accent-purple: #4ade80;
+    --color-accent-green: #4ade80;
+    --color-border: rgba(74, 222, 128, 0.15);
+    --color-border-focus: rgba(74, 222, 128, 0.5);
+    --gradient-primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-board: linear-gradient(180deg, #184a28 0%, #102d18 100%);
+    --shadow-glow-purple: 0 0 30px rgba(74, 222, 128, 0.4);
+}
+
+/* Change body background for Forest theme */
+body[data-theme="forest"] {
+    background-image: radial-gradient(circle at 20% 50%,
+            rgba(16, 185, 129, 0.15) 0%,
+            transparent 50%),
+        radial-gradient(circle at 80% 80%,
+            rgba(5, 150, 105, 0.15) 0%,
+            transparent 50%);
+}

@@ -1,0 +1,23 @@
+# Step-by-step guide to push to GitHub
+
+# 1. Initialize Git repository
+git init
+
+# 2. Add all files
+git add .
+
+# 3. Create initial commit
+git commit -m "Initial commit - Connect 4 v1.1 with Advanced AI"
+
+# 4. Go to GitHub.com and create a new repository
+# - Click the '+' icon → 'New repository'
+# - Name it: connect4-game (or whatever you prefer)
+# - Don't initialize with README (we already have one)
+# - Click 'Create repository'
+
+# 5. Link your local repo to GitHub (replace YOUR_USERNAME and YOUR_REPO)
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+
+# 6. Push to GitHub
+git branch -M main
+git push -u origin main
