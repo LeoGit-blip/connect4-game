@@ -1,0 +1,11 @@
+{
+    "name": "connect4-game",
+    "version": "1.0.0",
+    "description": "A beautiful Connect 4 game with AI opponent",
+    "scripts": {
+        "start": "npx serve ."
+    },
+    "dependencies": {
+        "serve": "^14.2.1"
+    }
+}
