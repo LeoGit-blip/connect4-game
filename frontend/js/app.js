@@ -23,9 +23,19 @@ class App {
         if (configParam) {
             try {
                 this.gameConfig = JSON.parse(decodeURIComponent(configParam));
-                console.log('Loaded configuration:', this.gameConfig);
+                console.log('Loaded configuration from URL:', this.gameConfig);
             } catch (error) {
                 console.error('Failed to parse configuration:', error);
+            }
+        }
+
+        // Fallback to localStorage if no URL config
+        if (!this.gameConfig) {
+            console.log('No URL config, checking localStorage...');
+            const savedConfig = loadGameConfig();
+            if (savedConfig) {
+                this.gameConfig = savedConfig;
+                console.log('Loaded configuration from localStorage:', this.gameConfig);
             }
         }
 
@@ -39,7 +49,8 @@ class App {
         if (this.gameConfig) {
             await this.createConfiguredGame();
         } else {
-            // Redirect to menu if no config
+            // This should rarely happen now as loadGameConfig returns defaults
+            console.warn('No configuration found, redirecting to menu');
             window.location.href = 'menu.html';
         }
     }
