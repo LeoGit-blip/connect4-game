@@ -8,6 +8,7 @@ class App {
         this.currentGameId = null;
         this.currentGameState = null;
         this.gameConfig = null;
+        this.moveInProgress = false; // Prevent spam clicking
     }
 
     /**
@@ -64,7 +65,8 @@ class App {
         if (board) {
             board.addEventListener('click', (e) => {
                 const column = e.target.closest('.column');
-                if (column && !column.classList.contains('disabled') && gameUI.isGameActive) {
+                // Check: column exists, not disabled, game active, and no move in progress
+                if (column && !column.classList.contains('disabled') && gameUI.isGameActive && !this.moveInProgress) {
                     window.audioManager.playButtonClick();
                     const columnIndex = parseInt(column.dataset.column);
                     this.handleColumnClick(columnIndex);
@@ -172,6 +174,12 @@ class App {
      * @param {number} columnIndex - Column that was clicked
      */
     async handleColumnClick(columnIndex) {
+        // Prevent spam clicking - check if move is already in progress
+        if (this.moveInProgress) {
+            console.log('Move already in progress, ignoring click');
+            return;
+        }
+
         if (!this.currentGameId || !gameUI.isGameActive) {
             return;
         }
@@ -181,6 +189,10 @@ class App {
             console.log('Cannot move during AI turn');
             return;
         }
+
+        // Set flag to prevent concurrent moves
+        this.moveInProgress = true;
+        gameUI.disableBoard(); // Visually disable board
 
         try {
             console.log(`Making move in column ${columnIndex}...`);
@@ -198,11 +210,24 @@ class App {
                 // Check if it's AI's turn next
                 if (gameState.isAITurn && gameState.status === 'IN_PROGRESS') {
                     console.log('AI turn detected, executing AI move');
+                    // Don't clear moveInProgress yet - AI will handle it
                     await this.handleAITurn();
+                } else {
+                    // Clear flag if no AI turn follows
+                    this.moveInProgress = false;
+                    if (gameState.status === 'IN_PROGRESS') {
+                        gameUI.enableBoard();
+                    }
                 }
+            } else {
+                // Move failed, clear flag
+                this.moveInProgress = false;
+                gameUI.enableBoard();
             }
         } catch (error) {
             console.error('Failed to make move:', error);
+            this.moveInProgress = false; // Clear flag on error
+            gameUI.enableBoard();
             alert(error.message || 'Failed to make move');
         }
     }
@@ -217,6 +242,7 @@ class App {
             console.log('AI is thinking...');
             window.audioManager.playAIThinking();
             gameUI.showAIThinking();
+            gameUI.disableBoard(); // Keep board disabled during AI turn
 
             // Wait a moment for better UX
             await this.sleep(800);
@@ -232,10 +258,23 @@ class App {
                 // Refresh game state
                 const gameState = await apiClient.getGame(this.currentGameId);
                 this.currentGameState = gameState;
+
+                // Clear moveInProgress flag after AI move
+                this.moveInProgress = false;
+
+                // Re-enable board if game is still in progress
+                if (gameState.status === 'IN_PROGRESS') {
+                    gameUI.enableBoard();
+                }
+            } else {
+                this.moveInProgress = false;
+                gameUI.enableBoard();
             }
         } catch (error) {
             console.error('AI move failed:', error);
             gameUI.hideAIThinking();
+            this.moveInProgress = false; // Clear flag on error
+            gameUI.enableBoard();
             alert('AI move failed: ' + error.message);
         }
     }
