@@ -104,6 +104,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -132,9 +133,12 @@ body {
 }
 
 @keyframes gradientShift {
-  0%, 100% {
+
+  0%,
+  100% {
     filter: hue-rotate(0deg);
   }
+
   50% {
     filter: hue-rotate(20deg);
   }
@@ -406,32 +410,6 @@ body {
   border: 1px solid var(--color-border);
 }
 
-/* ============================================
-   BOARD STYLES - CRITICAL SECTION
-   ============================================ */
-
-.board-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.board {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  padding: 2rem;
-  background: var(--gradient-board);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  border: 2px solid var(--color-border);
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
 .column {
   display: flex;
   flex-direction: column;
@@ -526,10 +504,13 @@ body {
 }
 
 @keyframes winPulseEnhanced {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
   }
+
   50% {
     transform: scale(1.15);
     filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
@@ -545,19 +526,24 @@ body {
     transform: translateY(-600px);
     opacity: 0;
   }
+
   50% {
     transform: translateY(0);
     opacity: 1;
   }
+
   65% {
     transform: translateY(-20px);
   }
+
   80% {
     transform: translateY(0);
   }
+
   90% {
     transform: translateY(-5px);
   }
+
   100% {
     transform: translateY(0);
   }
@@ -652,6 +638,7 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -663,6 +650,7 @@ body {
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -710,6 +698,7 @@ body {
     opacity: 0;
     transform: scale(0.8) translateY(-50px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -814,9 +803,12 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -826,73 +818,15 @@ body {
 .footer {
   text-align: center;
   margin-top: var(--spacing-xl);
-  padding: var(--spacing-md);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
-/* Confetti */
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  overflow: hidden;
-}
-
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: #f00;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(720deg);
-  }
-}
-
-/* =========================================
-   RESPONSIVE DESIGN
-   ========================================= */
-
+/* Media Queries */
 @media (max-width: 1400px) {
   .game-container {
-    grid-template-columns: 260px auto 260px;
-    gap: 1.25rem;
-    padding: 0.75rem;
-  }
-
-  .cell {
-    width: 56px;
-    height: 56px;
-  }
-
-  .piece {
-    width: 49px;
-    height: 49px;
-  }
-
-  .board {
-    gap: 11px;
-    padding: 1.5rem;
-  }
-
-  .move-history-panel {
-    height: 550px;
-  }
-}
-
-@media (max-width: 1300px) {
-  .game-container {
-    grid-template-columns: 240px auto 240px;
-    gap: 1rem;
-    padding: 0.5rem;
+    grid-template-columns: 280px auto 280px;
+    gap: var(--spacing-md);
   }
 
   .cell {
