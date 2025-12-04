@@ -176,112 +176,74 @@ class GameLogic {
         // Get difficulty level from config (default to MEDIUM)
         const difficulty = game.config?.aiDifficulty || 'MEDIUM';
 
-        // EXPERT and GRANDMASTER: Use minimax algorithm with increased depth
+        // EXPERT and GRANDMASTER: Use minimax algorithm
         if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
-            // Use minimax with increased depth (no opening book - it was causing bugs)
             const depth = difficulty === 'EXPERT' ? 7 : 8;
-            return this.minimaxMove(game.board, game.currentPlayer, depth);
+            return this.minimaxMove(game.board, game.currentPlayer, depth, validMoves);
         }
 
-        // EASY: 30% chance of random move, otherwise strategic
+        // EASY: 40% chance of random move, otherwise strategic
         if (difficulty === 'EASY') {
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.4) {
                 return validMoves[Math.floor(Math.random() * validMoves.length)];
             }
         }
 
-        // Strategic moves (used by EASY 70%, MEDIUM 100%, HARD 100%)
+        // Strategic moves (used by EASY 60%, MEDIUM 100%, HARD 100%)
+
         // 1. Check for winning move
         for (let col of validMoves) {
-            if (this.canWin(game.board, col, game.currentPlayer)) return col;
+            if (this.canWin(game.board, col, game.currentPlayer)) {
+                console.log('AI found winning move:', col);
+                return col;
+            }
         }
 
         // 2. Check for blocking move
         const opponent = game.currentPlayer === 'RED' ? 'YELLOW' : 'RED';
         for (let col of validMoves) {
-            if (this.canWin(game.board, col, opponent)) return col;
+            if (this.canWin(game.board, col, opponent)) {
+                console.log('AI blocking opponent at:', col);
+                return col;
+            }
         }
 
         // HARD: Look for setup moves (create two-in-a-row opportunities)
         if (difficulty === 'HARD') {
             const setupMove = this.findSetupMove(game.board, validMoves, game.currentPlayer);
-            if (setupMove !== -1) return setupMove;
+            if (setupMove !== -1) {
+                console.log('AI found setup move:', setupMove);
+                return setupMove;
+            }
         }
 
-        // 3. Prefer columns near center (not always center!)
-        const centerPreference = [3, 2, 4, 1, 5, 0, 6];
-        for (let col of centerPreference) {
-            if (validMoves.includes(col)) return col;
-        }
+        // 3. Intelligent column selection with some randomness
+        // Score each valid column and pick the best one
+        let columnScores = validMoves.map(col => {
+            let score = 0;
 
-        // Fallback to random
-        return validMoves[Math.floor(Math.random() * validMoves.length)];
+            // Slight preference for center columns (but not overwhelming)
+            const distanceFromCenter = Math.abs(col - 3);
+            score += (3 - distanceFromCenter) * 0.5; // Max +1.5 for center
+
+            // Add randomness to prevent predictability
+            score += Math.random() * 2; // Add 0-2 random points
+
+            return { col, score };
+        });
+
+        // Sort by score and pick the best
+        columnScores.sort((a, b) => b.score - a.score);
+        const bestMove = columnScores[0].col;
+
+        console.log('AI strategic move:', bestMove, 'scores:', columnScores);
+        return bestMove;
     }
-
-    // Opening book: Optimal opening moves for EXPERT/GRANDMASTER
-    getOpeningBookMove(board, player) {
-        // Count AI's pieces to determine which move this is
-        let aiPieceCount = 0;
-        for (let r = 0; r < this.ROWS; r++) {
-            for (let c = 0; c < this.COLS; c++) {
-                if (board[r][c] === player) aiPieceCount++;
-            }
-        }
-
-        // AI's first move
-        if (aiPieceCount === 0) {
-            // Always play center on first move
-            return 3;
-        }
-
-        // AI's second move
-        if (aiPieceCount === 1) {
-            // Find where AI's piece is (search from bottom up)
-            let aiFirstCol = -1;
-            for (let r = this.ROWS - 1; r >= 0; r--) {
-                for (let c = 0; c < this.COLS; c++) {
-                    if (board[r][c] === player) {
-                        aiFirstCol = c;
-                        break;
-                    }
-                }
-                if (aiFirstCol !== -1) break;
-            }
-
-            // If AI played center (column 3), build next to it
-            if (aiFirstCol === 3) {
-                // Prefer columns 2 or 4 (randomly choose)
-                const options = [];
-                if (board[0][2] === null) options.push(2);
-                if (board[0][4] === null) options.push(4);
-                if (options.length > 0) {
-                    return options[Math.floor(Math.random() * options.length)];
-                }
-            }
-
-            // If AI didn't play center, try to take it if available
-            if (board[0][3] === null) return 3;
-
-            // Otherwise, play next to AI's first move
-            if (aiFirstCol > 0 && board[0][aiFirstCol - 1] === null) return aiFirstCol - 1;
-            if (aiFirstCol < this.COLS - 1 && board[0][aiFirstCol + 1] === null) return aiFirstCol + 1;
-        }
-
-        // After 2 moves, use minimax
-        return -1;
-    }
-
-
 
     // Minimax algorithm for EXPERT and GRANDMASTER
-    minimaxMove(board, player, maxDepth) {
+    minimaxMove(board, player, maxDepth, validMoves) {
         let bestScore = -Infinity;
-        let bestMove = 3; // Default to center
-
-        const validMoves = [];
-        for (let c = 0; c < this.COLS; c++) {
-            if (board[0][c] === null) validMoves.push(c);
-        }
+        let bestMoves = []; // Track all moves with best score
 
         for (let col of validMoves) {
             const row = this.getLowestRow(board, col);
@@ -294,14 +256,24 @@ class GameLogic {
             // Evaluate
             const score = this.minimax(newBoard, maxDepth - 1, false, player, -Infinity, Infinity);
 
-            // Undo move (not needed since we cloned)
+            // Track best moves
             if (score > bestScore) {
                 bestScore = score;
-                bestMove = col;
+                bestMoves = [col];
+            } else if (score === bestScore) {
+                bestMoves.push(col); // Add to tied moves
             }
         }
 
-        return bestMove;
+        // If multiple moves have same score, pick randomly among them
+        if (bestMoves.length > 0) {
+            const randomIndex = Math.floor(Math.random() * bestMoves.length);
+            console.log('Minimax best moves:', bestMoves, 'choosing:', bestMoves[randomIndex]);
+            return bestMoves[randomIndex];
+        }
+
+        // Fallback to random valid move
+        return validMoves[Math.floor(Math.random() * validMoves.length)];
     }
 
     // Minimax with alpha-beta pruning
