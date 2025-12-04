@@ -292,12 +292,36 @@ class App {
 
             gameUI.updateStatus(response.gameStatus, response.message);
 
-            if (response.gameStatus === 'RED_WINS') {
-                gameUI.showWinner('RED');
-            } else if (response.gameStatus === 'YELLOW_WINS') {
-                gameUI.showWinner('YELLOW');
-            } else if (response.gameStatus === 'DRAW') {
-                gameUI.showWinner('DRAW');
+            // Record statistics for both players
+            if (window.statsManager && this.gameConfig) {
+                const player1Name = this.gameConfig.player1?.name;
+                const player2Name = this.gameConfig.player2?.name;
+
+                if (response.gameStatus === 'RED_WINS') {
+                    // RED is always player1
+                    if (player1Name) window.statsManager.recordGameForPlayer(player1Name, 'win');
+                    if (player2Name) window.statsManager.recordGameForPlayer(player2Name, 'loss');
+                    gameUI.showWinner('RED');
+                } else if (response.gameStatus === 'YELLOW_WINS') {
+                    // YELLOW is always player2
+                    if (player1Name) window.statsManager.recordGameForPlayer(player1Name, 'loss');
+                    if (player2Name) window.statsManager.recordGameForPlayer(player2Name, 'win');
+                    gameUI.showWinner('YELLOW');
+                } else if (response.gameStatus === 'DRAW') {
+                    // Both players get a draw
+                    if (player1Name) window.statsManager.recordGameForPlayer(player1Name, 'draw');
+                    if (player2Name) window.statsManager.recordGameForPlayer(player2Name, 'draw');
+                    gameUI.showWinner('DRAW');
+                }
+            } else {
+                // Fallback if statsManager not available
+                if (response.gameStatus === 'RED_WINS') {
+                    gameUI.showWinner('RED');
+                } else if (response.gameStatus === 'YELLOW_WINS') {
+                    gameUI.showWinner('YELLOW');
+                } else if (response.gameStatus === 'DRAW') {
+                    gameUI.showWinner('DRAW');
+                }
             }
         }
     }
