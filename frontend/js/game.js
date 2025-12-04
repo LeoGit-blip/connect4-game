@@ -210,6 +210,7 @@ class GameUI {
      * @param {string} message - Status message
      */
     updateStatus(status, message) {
+        if (!this.gameStatusElement) return;
         const statusText = this.gameStatusElement.querySelector('.status-text');
         if (statusText) {
             statusText.textContent = message || 'Game in progress';
