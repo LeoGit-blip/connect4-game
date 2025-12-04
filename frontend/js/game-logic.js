@@ -211,6 +211,43 @@ class GameLogic {
 
         return this.checkWin(newBoard, row, col, player);
     }
+
+    // Method to show winner modal
+    showWinner(winner) {
+        const modal = document.getElementById('winnerModal');
+        const winnerIcon = document.getElementById('winnerIcon');
+        const winnerTitle = document.getElementById('winnerTitle');
+
+        if (!modal) return;
+
+        // Clear previous classes
+        winnerIcon.className = 'winner-icon';
+
+        if (winner === 'DRAW') {
+            winnerIcon.classList.add('draw');
+            winnerTitle.textContent = "It's a Draw!";
+        } else {
+            const colorClass = winner.toLowerCase();
+            winnerIcon.classList.add(colorClass);
+            const playerName = this.playerNames?.[winner] || winner;
+            winnerTitle.textContent = `${playerName} Wins!`;
+        }
+
+        // Show modal with animation
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+
+    // Method to hide winner modal
+    hideWinner() {
+        const modal = document.getElementById('winnerModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+    }
 }
 
 // Export singleton

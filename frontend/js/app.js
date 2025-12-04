@@ -308,6 +308,13 @@ class App {
         gameUI.clearMoveHistory();
         gameUI.enableBoard();
         gameUI.hideWinner();
+
+        // CRITICAL: Force hide winner modal on game start
+        const modal = document.getElementById('winnerModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
     }
 
     /**

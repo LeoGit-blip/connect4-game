@@ -258,61 +258,41 @@ class GameUI {
      * Displays the winner modal
      * @param {string} winner - Winning player or 'DRAW'
      */
+    // Method to show winner modal
     showWinner(winner) {
-        console.log('showWinner called with:', winner);
-        console.log('Modal element exists:', !!this.winnerModal);
+        const modal = document.getElementById('winnerModal');
+        const winnerIcon = document.getElementById('winnerIcon');
+        const winnerTitle = document.getElementById('winnerTitle');
 
-        this.isGameActive = false;
+        if (!modal) return;
 
-        if (!this.winnerModal) {
-            console.error('Cannot show winner - modal element not found!');
-            alert(`Game Over! Winner: ${winner}`); // Fallback
-            return;
-        }
+        // Clear previous classes
+        winnerIcon.className = 'winner-icon';
 
         if (winner === 'DRAW') {
-            if (this.winnerIcon) this.winnerIcon.className = 'winner-icon draw';
-            if (this.winnerTitle) this.winnerTitle.textContent = "It's a Draw!";
-
-            // Record draw for both players
-            if (window.statsManager) {
-                const player1Name = this.playerNames.RED || 'Player 1';
-                const player2Name = this.playerNames.YELLOW || 'Player 2';
-
-                window.statsManager.recordGameForPlayer(player1Name, 'draw');
-                window.statsManager.recordGameForPlayer(player2Name, 'draw');
-            }
+            winnerIcon.classList.add('draw');
+            winnerTitle.textContent = "It's a Draw!";
         } else {
-            // Get color class and player name
-            const colorClass = this.getPlayerColorClass(winner);
-            const winnerName = this.playerNames[winner] || winner;
-
-            if (this.winnerIcon) this.winnerIcon.className = `winner-icon ${colorClass}`;
-            if (this.winnerTitle) this.winnerTitle.textContent = `${winnerName} Wins!`;
-
-            // Record win for winner and loss for loser
-            if (window.statsManager) {
-                // Determine loser
-                const loser = (winner === 'RED') ? 'YELLOW' : 'RED';
-                const loserName = this.playerNames[loser] || loser;
-
-                // Record stats for both players
-                window.statsManager.recordGameForPlayer(winnerName, 'win');
-                window.statsManager.recordGameForPlayer(loserName, 'loss');
-            }
+            const colorClass = winner.toLowerCase();
+            winnerIcon.classList.add(colorClass);
+            const playerName = this.playerNames?.[winner] || winner;
+            winnerTitle.textContent = `${playerName} Wins!`;
         }
 
-        console.log('Adding "show" class to modal');
-        this.winnerModal.classList.add('show');
-        this.disableBoard();
+        // Show modal with animation
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
     }
 
-    /**
-     * Hides the winner modal
-     */
+    // Method to hide winner modal
     hideWinner() {
-        this.winnerModal.classList.remove('show');
-        this.isGameActive = true;
+        const modal = document.getElementById('winnerModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
     }
 
     /**
