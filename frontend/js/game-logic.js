@@ -176,8 +176,19 @@ class GameLogic {
         // Get difficulty level from config (default to MEDIUM)
         const difficulty = game.config?.aiDifficulty || 'MEDIUM';
 
-        // EXPERT and GRANDMASTER: Use minimax algorithm with increased depth
+        // EXPERT and GRANDMASTER: Use opening book + minimax algorithm
         if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
+            // Check opening book first (only for AI's first 2 moves)
+            const aiMoveCount = game.moveHistory.filter(m => m.player === game.currentPlayer).length;
+            if (aiMoveCount < 2) {
+                const openingMove = this.getOpeningBookMove(game.board, game.currentPlayer);
+                if (openingMove !== -1) {
+                    console.log('Using opening book move:', openingMove);
+                    return openingMove;
+                }
+            }
+
+            // Use minimax with increased depth
             const depth = difficulty === 'EXPERT' ? 7 : 8;
             return this.minimaxMove(game.board, game.currentPlayer, depth);
         }
@@ -233,39 +244,46 @@ class GameLogic {
         // AI's first move
         if (aiPieceCount === 0) {
             // Always play center on first move
-            if (board[5][3] === null) return 3;
-            // If center is taken (shouldn't happen), play next to it
-            return Math.random() < 0.5 ? 2 : 4;
+            return 3;
         }
 
         // AI's second move
         if (aiPieceCount === 1) {
-            // Find where AI played first
+            // Find where AI's piece is (search from bottom up)
             let aiFirstCol = -1;
-            for (let c = 0; c < this.COLS; c++) {
-                if (board[5][c] === player) {
-                    aiFirstCol = c;
-                    break;
+            for (let r = this.ROWS - 1; r >= 0; r--) {
+                for (let c = 0; c < this.COLS; c++) {
+                    if (board[r][c] === player) {
+                        aiFirstCol = c;
+                        break;
+                    }
                 }
+                if (aiFirstCol !== -1) break;
             }
 
-            // If AI played center, build next to it
+            // If AI played center (column 3), build next to it
             if (aiFirstCol === 3) {
-                // Prefer columns 2 or 4
-                if (board[5][2] === null && board[5][4] === null) {
-                    return Math.random() < 0.5 ? 2 : 4;
+                // Prefer columns 2 or 4 (randomly choose)
+                const options = [];
+                if (board[0][2] === null) options.push(2);
+                if (board[0][4] === null) options.push(4);
+                if (options.length > 0) {
+                    return options[Math.floor(Math.random() * options.length)];
                 }
-                if (board[5][2] === null) return 2;
-                if (board[5][4] === null) return 4;
             }
 
-            // If AI didn't play center, try to take it
-            if (board[5][3] === null) return 3;
+            // If AI didn't play center, try to take it if available
+            if (board[0][3] === null) return 3;
+
+            // Otherwise, play next to AI's first move
+            if (aiFirstCol > 0 && board[0][aiFirstCol - 1] === null) return aiFirstCol - 1;
+            if (aiFirstCol < this.COLS - 1 && board[0][aiFirstCol + 1] === null) return aiFirstCol + 1;
         }
 
         // After 2 moves, use minimax
         return -1;
     }
+
 
 
     // Minimax algorithm for EXPERT and GRANDMASTER
