@@ -205,8 +205,8 @@ class GameLogic {
 
         // 4. Use minimax for EXPERT and GRANDMASTER
         if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
-            const depth = difficulty === 'EXPERT' ? 10 : 14; // Grandmaster: depth 14!
-            return this.minimaxMove(game.board, game.currentPlayer, depth, validMoves);
+            const depth = difficulty === 'EXPERT' ? 7 : 8;
+            return this.minimaxMove(game.board, game.currentPlayer, depth);
         }
 
         // EASY: 40% chance of random move, otherwise strategic
@@ -409,7 +409,7 @@ class GameLogic {
                 score -= 3; // Penalty for opponent center control
             }
         }
-        
+
         // Extra bonus for strong center control
         if (centerCount >= 3) {
             score += 10;
@@ -425,7 +425,7 @@ class GameLogic {
                 if (board[r][c] === player) {
                     // Prefer pieces in lower rows (more stable)
                     score += (this.ROWS - r);
-                    
+
                     // Prefer center columns
                     score += COLUMN_WEIGHTS[c];
                 }
@@ -438,19 +438,19 @@ class GameLogic {
     // Evaluate connectivity - how well pieces are connected
     evaluateConnectivity(board, player) {
         let connectivity = 0;
-        
+
         for (let r = 0; r < this.ROWS; r++) {
             for (let c = 0; c < this.COLS; c++) {
                 if (board[r][c] === player) {
                     let adjacentCount = 0;
-                    
+
                     // Check all 8 directions
                     const directions = [
                         [-1, -1], [-1, 0], [-1, 1],
-                        [0, -1],           [0, 1],
-                        [1, -1],  [1, 0],  [1, 1]
+                        [0, -1], [0, 1],
+                        [1, -1], [1, 0], [1, 1]
                     ];
-                    
+
                     for (let [dr, dc] of directions) {
                         const nr = r + dr;
                         const nc = c + dc;
@@ -460,12 +460,12 @@ class GameLogic {
                             }
                         }
                     }
-                    
+
                     connectivity += adjacentCount * 2; // Bonus for each connection
                 }
             }
         }
-        
+
         return connectivity;
     }
 
