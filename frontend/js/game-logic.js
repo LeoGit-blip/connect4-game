@@ -178,11 +178,14 @@ class GameLogic {
 
         // EXPERT and GRANDMASTER: Use opening book + minimax algorithm
         if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
-            // Check opening book first (for first few moves)
-            const openingMove = this.getOpeningBookMove(game.board, game.moveHistory.length);
-            if (openingMove !== -1) {
-                console.log('Using opening book move:', openingMove);
-                return openingMove;
+            // Check opening book first (only for AI's first 2 moves)
+            const aiMoveCount = game.moveHistory.filter(m => m.player === game.currentPlayer).length;
+            if (aiMoveCount < 2) {
+                const openingMove = this.getOpeningBookMove(game.board, game.currentPlayer);
+                if (openingMove !== -1) {
+                    console.log('Using opening book move:', openingMove);
+                    return openingMove;
+                }
             }
 
             // Use minimax with increased depth
@@ -229,46 +232,49 @@ class GameLogic {
     }
 
     // Opening book: Optimal opening moves for EXPERT/GRANDMASTER
-    getOpeningBookMove(board, moveCount) {
-        // Only use opening book for first 3 moves
-        if (moveCount > 5) return -1;
-
-        // Count pieces on board to determine move number
-        let piecesOnBoard = 0;
+    getOpeningBookMove(board, player) {
+        // Count AI's pieces to determine which move this is
+        let aiPieceCount = 0;
         for (let r = 0; r < this.ROWS; r++) {
             for (let c = 0; c < this.COLS; c++) {
-                if (board[r][c] !== null) piecesOnBoard++;
+                if (board[r][c] === player) aiPieceCount++;
             }
         }
 
-        // First move: Always play center (column 3)
-        if (piecesOnBoard === 0) {
-            return 3;
+        // AI's first move
+        if (aiPieceCount === 0) {
+            // Always play center on first move
+            if (board[5][3] === null) return 3;
+            // If center is taken (shouldn't happen), play next to it
+            return Math.random() < 0.5 ? 2 : 4;
         }
 
-        // Second move (responding to opponent's first move)
-        if (piecesOnBoard === 1) {
-            // If opponent played center, play next to it
-            if (board[5][3] !== null) {
-                return Math.random() < 0.5 ? 2 : 4;
+        // AI's second move
+        if (aiPieceCount === 1) {
+            // Find where AI played first
+            let aiFirstCol = -1;
+            for (let c = 0; c < this.COLS; c++) {
+                if (board[5][c] === player) {
+                    aiFirstCol = c;
+                    break;
+                }
             }
-            // Otherwise, take the center
-            return 3;
-        }
 
-        // Third move
-        if (piecesOnBoard === 2) {
-            // If we control center, build on it
-            if (board[5][3] !== null) {
-                // Check what's available next to center
+            // If AI played center, build next to it
+            if (aiFirstCol === 3) {
+                // Prefer columns 2 or 4
+                if (board[5][2] === null && board[5][4] === null) {
+                    return Math.random() < 0.5 ? 2 : 4;
+                }
                 if (board[5][2] === null) return 2;
                 if (board[5][4] === null) return 4;
             }
-            // Otherwise take center if available
+
+            // If AI didn't play center, try to take it
             if (board[5][3] === null) return 3;
         }
 
-        // After opening book, use minimax
+        // After 2 moves, use minimax
         return -1;
     }
 
