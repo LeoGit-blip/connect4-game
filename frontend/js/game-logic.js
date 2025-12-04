@@ -161,15 +161,10 @@ class GameLogic {
         };
     }
 
-    // Simple AI implementation
+    // AI implementation with difficulty levels
     getAIMove(gameId) {
         const game = this.games.get(gameId);
         if (!game) throw new Error('Game not found');
-
-        // Simple heuristic: 
-        // 1. Can I win now?
-        // 2. Can opponent win next? Block them.
-        // 3. Pick random valid column.
 
         const validMoves = [];
         for (let c = 0; c < this.COLS; c++) {
@@ -178,6 +173,31 @@ class GameLogic {
 
         if (validMoves.length === 0) throw new Error('No valid moves');
 
+        // Get difficulty level from config (default to MEDIUM)
+        const difficulty = game.config?.aiDifficulty || 'MEDIUM';
+
+        // EXPERT and GRANDMASTER: Use opening book + minimax algorithm
+        if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
+            // Check opening book first (for first few moves)
+            const openingMove = this.getOpeningBookMove(game.board, game.moveHistory.length);
+            if (openingMove !== -1) {
+                console.log('Using opening book move:', openingMove);
+                return openingMove;
+            }
+
+            // Use minimax with increased depth
+            const depth = difficulty === 'EXPERT' ? 7 : 8;
+            return this.minimaxMove(game.board, game.currentPlayer, depth);
+        }
+
+        // EASY: 30% chance of random move, otherwise strategic
+        if (difficulty === 'EASY') {
+            if (Math.random() < 0.3) {
+                return validMoves[Math.floor(Math.random() * validMoves.length)];
+            }
+        }
+
+        // Strategic moves (used by EASY 70%, MEDIUM 100%, HARD 100%)
         // 1. Check for winning move
         for (let col of validMoves) {
             if (this.canWin(game.board, col, game.currentPlayer)) return col;
@@ -189,9 +209,281 @@ class GameLogic {
             if (this.canWin(game.board, col, opponent)) return col;
         }
 
-        // 3. Random move (prefer center)
+        // HARD: Look for setup moves (create two-in-a-row opportunities)
+        if (difficulty === 'HARD') {
+            const setupMove = this.findSetupMove(game.board, validMoves, game.currentPlayer);
+            if (setupMove !== -1) return setupMove;
+        }
+
+        // 3. Prefer center column
         if (validMoves.includes(3)) return 3;
+
+        // 4. Prefer columns near center
+        const centerPreference = [3, 2, 4, 1, 5, 0, 6];
+        for (let col of centerPreference) {
+            if (validMoves.includes(col)) return col;
+        }
+
+        // Fallback to random
         return validMoves[Math.floor(Math.random() * validMoves.length)];
+    }
+
+    // Opening book: Optimal opening moves for EXPERT/GRANDMASTER
+    getOpeningBookMove(board, moveCount) {
+        // Only use opening book for first 3 moves
+        if (moveCount > 5) return -1;
+
+        // Count pieces on board to determine move number
+        let piecesOnBoard = 0;
+        for (let r = 0; r < this.ROWS; r++) {
+            for (let c = 0; c < this.COLS; c++) {
+                if (board[r][c] !== null) piecesOnBoard++;
+            }
+        }
+
+        // First move: Always play center (column 3)
+        if (piecesOnBoard === 0) {
+            return 3;
+        }
+
+        // Second move (responding to opponent's first move)
+        if (piecesOnBoard === 1) {
+            // If opponent played center, play next to it
+            if (board[5][3] !== null) {
+                return Math.random() < 0.5 ? 2 : 4;
+            }
+            // Otherwise, take the center
+            return 3;
+        }
+
+        // Third move
+        if (piecesOnBoard === 2) {
+            // If we control center, build on it
+            if (board[5][3] !== null) {
+                // Check what's available next to center
+                if (board[5][2] === null) return 2;
+                if (board[5][4] === null) return 4;
+            }
+            // Otherwise take center if available
+            if (board[5][3] === null) return 3;
+        }
+
+        // After opening book, use minimax
+        return -1;
+    }
+
+
+    // Minimax algorithm for EXPERT and GRANDMASTER
+    minimaxMove(board, player, maxDepth) {
+        let bestScore = -Infinity;
+        let bestMove = 3; // Default to center
+
+        const validMoves = [];
+        for (let c = 0; c < this.COLS; c++) {
+            if (board[0][c] === null) validMoves.push(c);
+        }
+
+        for (let col of validMoves) {
+            const row = this.getLowestRow(board, col);
+            if (row === -1) continue;
+
+            // Make move
+            const newBoard = board.map(r => [...r]);
+            newBoard[row][col] = player;
+
+            // Evaluate
+            const score = this.minimax(newBoard, maxDepth - 1, false, player, -Infinity, Infinity);
+
+            // Undo move (not needed since we cloned)
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = col;
+            }
+        }
+
+        return bestMove;
+    }
+
+    // Minimax with alpha-beta pruning
+    minimax(board, depth, isMaximizing, aiPlayer, alpha, beta) {
+        const opponent = aiPlayer === 'RED' ? 'YELLOW' : 'RED';
+        const currentPlayer = isMaximizing ? aiPlayer : opponent;
+
+        // Check terminal states
+        if (this.checkWinForPlayer(board, aiPlayer)) return 1000 + depth;
+        if (this.checkWinForPlayer(board, opponent)) return -1000 - depth;
+        if (this.isBoardFull(board)) return 0;
+        if (depth === 0) return this.evaluateBoard(board, aiPlayer);
+
+        const validMoves = [];
+        for (let c = 0; c < this.COLS; c++) {
+            if (board[0][c] === null) validMoves.push(c);
+        }
+
+        if (isMaximizing) {
+            let maxScore = -Infinity;
+            for (let col of validMoves) {
+                const row = this.getLowestRow(board, col);
+                if (row === -1) continue;
+
+                const newBoard = board.map(r => [...r]);
+                newBoard[row][col] = currentPlayer;
+
+                const score = this.minimax(newBoard, depth - 1, false, aiPlayer, alpha, beta);
+                maxScore = Math.max(maxScore, score);
+                alpha = Math.max(alpha, score);
+                if (beta <= alpha) break; // Pruning
+            }
+            return maxScore;
+        } else {
+            let minScore = Infinity;
+            for (let col of validMoves) {
+                const row = this.getLowestRow(board, col);
+                if (row === -1) continue;
+
+                const newBoard = board.map(r => [...r]);
+                newBoard[row][col] = currentPlayer;
+
+                const score = this.minimax(newBoard, depth - 1, true, aiPlayer, alpha, beta);
+                minScore = Math.min(minScore, score);
+                beta = Math.min(beta, score);
+                if (beta <= alpha) break; // Pruning
+            }
+            return minScore;
+        }
+    }
+
+    // Helper: Get lowest available row in column
+    getLowestRow(board, col) {
+        for (let r = this.ROWS - 1; r >= 0; r--) {
+            if (board[r][col] === null) return r;
+        }
+        return -1;
+    }
+
+    // Helper: Check if specific player has won
+    checkWinForPlayer(board, player) {
+        // Check all positions for a win
+        for (let r = 0; r < this.ROWS; r++) {
+            for (let c = 0; c < this.COLS; c++) {
+                if (board[r][c] === player) {
+                    if (this.checkWin(board, r, c, player)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Helper: Check if board is full
+    isBoardFull(board) {
+        return board[0].every(cell => cell !== null);
+    }
+
+    // Evaluate board position for minimax
+    evaluateBoard(board, player) {
+        const opponent = player === 'RED' ? 'YELLOW' : 'RED';
+        let score = 0;
+
+        // Score center column control
+        for (let r = 0; r < this.ROWS; r++) {
+            if (board[r][3] === player) score += 3;
+            else if (board[r][3] === opponent) score -= 3;
+        }
+
+        // Score potential winning positions
+        score += this.scorePosition(board, player) - this.scorePosition(board, opponent);
+
+        return score;
+    }
+
+    // Score potential winning positions
+    scorePosition(board, player) {
+        let score = 0;
+
+        // Check horizontal, vertical, and diagonal patterns
+        for (let r = 0; r < this.ROWS; r++) {
+            for (let c = 0; c < this.COLS; c++) {
+                // Horizontal
+                if (c <= this.COLS - 4) {
+                    const window = [board[r][c], board[r][c + 1], board[r][c + 2], board[r][c + 3]];
+                    score += this.evaluateWindow(window, player);
+                }
+                // Vertical
+                if (r <= this.ROWS - 4) {
+                    const window = [board[r][c], board[r + 1][c], board[r + 2][c], board[r + 3][c]];
+                    score += this.evaluateWindow(window, player);
+                }
+                // Diagonal /
+                if (r >= 3 && c <= this.COLS - 4) {
+                    const window = [board[r][c], board[r - 1][c + 1], board[r - 2][c + 2], board[r - 3][c + 3]];
+                    score += this.evaluateWindow(window, player);
+                }
+                // Diagonal \
+                if (r <= this.ROWS - 4 && c <= this.COLS - 4) {
+                    const window = [board[r][c], board[r + 1][c + 1], board[r + 2][c + 2], board[r + 3][c + 3]];
+                    score += this.evaluateWindow(window, player);
+                }
+            }
+        }
+
+        return score;
+    }
+
+    // Evaluate a window of 4 cells
+    evaluateWindow(window, player) {
+        const opponent = player === 'RED' ? 'YELLOW' : 'RED';
+        const playerCount = window.filter(cell => cell === player).length;
+        const opponentCount = window.filter(cell => cell === opponent).length;
+        const emptyCount = window.filter(cell => cell === null).length;
+
+        if (playerCount === 4) return 100;
+        if (playerCount === 3 && emptyCount === 1) return 5;
+        if (playerCount === 2 && emptyCount === 2) return 2;
+        if (opponentCount === 3 && emptyCount === 1) return -4; // Block opponent
+
+        return 0;
+    }
+
+    // Find a move that sets up future winning opportunities (for HARD mode)
+    findSetupMove(board, validMoves, player) {
+        let bestMove = -1;
+        let bestScore = -1;
+
+        for (let col of validMoves) {
+            let score = 0;
+
+            // Find where piece would land
+            let row = -1;
+            for (let r = this.ROWS - 1; r >= 0; r--) {
+                if (board[r][col] === null) {
+                    row = r;
+                    break;
+                }
+            }
+            if (row === -1) continue;
+
+            // Check horizontal potential
+            let leftCount = 0, rightCount = 0;
+            for (let c = col - 1; c >= 0 && board[row][c] === player; c--) leftCount++;
+            for (let c = col + 1; c < this.COLS && board[row][c] === player; c++) rightCount++;
+            if (leftCount + rightCount >= 2) score += 3;
+
+            // Check vertical potential (pieces below)
+            let belowCount = 0;
+            for (let r = row + 1; r < this.ROWS && board[r][col] === player; r++) belowCount++;
+            if (belowCount >= 2) score += 3;
+
+            // Prefer center columns
+            if (col === 3) score += 2;
+            else if (col === 2 || col === 4) score += 1;
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = col;
+            }
+        }
+
+        return bestScore > 0 ? bestMove : -1;
     }
 
     canWin(board, col, player) {
