@@ -176,19 +176,8 @@ class GameLogic {
         // Get difficulty level from config (default to MEDIUM)
         const difficulty = game.config?.aiDifficulty || 'MEDIUM';
 
-        // EXPERT and GRANDMASTER: Use opening book + minimax algorithm
+        // EXPERT and GRANDMASTER: Use minimax algorithm with increased depth
         if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
-            // Check opening book first (only for AI's first 2 moves)
-            const aiMoveCount = game.moveHistory.filter(m => m.player === game.currentPlayer).length;
-            if (aiMoveCount < 2) {
-                const openingMove = this.getOpeningBookMove(game.board, game.currentPlayer);
-                if (openingMove !== -1) {
-                    console.log('Using opening book move:', openingMove);
-                    return openingMove;
-                }
-            }
-
-            // Use minimax with increased depth
             const depth = difficulty === 'EXPERT' ? 7 : 8;
             return this.minimaxMove(game.board, game.currentPlayer, depth);
         }
