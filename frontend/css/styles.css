@@ -28,9 +28,7 @@
   --gradient-orange: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   --gradient-pink: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
   --gradient-board: linear-gradient(180deg, #2d3561 0%, #1e2544 100%);
-  --gradient-glass: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -61,12 +59,26 @@
   --shadow-glow-orange: 0 0 20px rgba(249, 115, 22, 0.5);
   --shadow-glow-pink: 0 0 20px rgba(236, 72, 153, 0.5);
   --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+}
+
+* {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   min-height: 100vh;
@@ -74,12 +86,11 @@ body {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
-  background-image: radial-gradient(circle at 20% 50%,
-      rgba(102, 126, 234, 0.1) 0%,
-      transparent 50%),
-    radial-gradient(circle at 80% 80%,
-      rgba(168, 85, 247, 0.1) 0%,
-      transparent 50%);
+  background-image: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
 }
 
 .container {
@@ -93,7 +104,6 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -122,12 +132,9 @@ body {
 }
 
 @keyframes gradientShift {
-
-  0%,
-  100% {
+  0%, 100% {
     filter: hue-rotate(0deg);
   }
-
   50% {
     filter: hue-rotate(20deg);
   }
@@ -139,7 +146,7 @@ body {
   font-weight: 400;
 }
 
-/* Game Container - Centered Layout */
+/* Game Container */
 .game-container {
   display: grid;
   grid-template-columns: 340px auto 340px;
@@ -151,7 +158,7 @@ body {
   justify-content: center;
 }
 
-/* Game Info Panel - Left Side */
+/* Game Info Panel */
 .game-info {
   display: flex;
   flex-direction: column;
@@ -276,11 +283,6 @@ body {
   box-shadow: var(--shadow-glow-pink);
 }
 
-.player-badge span {
-  font-weight: 600;
-  font-size: 1.125rem;
-}
-
 .game-status {
   padding: var(--spacing-md);
   background: var(--color-bg-tertiary);
@@ -368,7 +370,6 @@ body {
   box-shadow: var(--shadow-glow-purple);
 }
 
-
 .btn {
   display: flex;
   align-items: center;
@@ -405,27 +406,83 @@ body {
   border: 1px solid var(--color-border);
 }
 
-.btn-large {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: 1.25rem;
-}
+/* ============================================
+   BOARD STYLES - CRITICAL SECTION
+   ============================================ */
 
-/* Board Wrapper - Center */
 .board-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  overflow-x: auto;
-  /* Allow horizontal scroll if needed on very small screens */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .board {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 12px;
-  padding: var(--spacing-lg);
+  padding: 2rem;
   background: var(--gradient-board);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--color-border);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-radius: var(--radius-sm);
+}
+
+.column:hover:not(.disabled) {
+  background: rgba(168, 85, 247, 0.1);
+  transform: translateY(-2px);
+}
+
+.column.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-inner);
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.cell:hover {
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.piece {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  position: relative;
+  z-index: 1;
+}
+
+.piece.red {
+  background: var(--gradient-red);
+  box-shadow: var(--shadow-glow-red);
 }
 
 .piece.yellow {
@@ -468,17 +525,14 @@ body {
   z-index: 10;
 }
 
-@keyframes winPulse {
-
-  0%,
-  100% {
+@keyframes winPulseEnhanced {
+  0%, 100% {
     transform: scale(1);
-    filter: brightness(1);
+    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
   }
-
   50% {
-    transform: scale(1.1);
-    filter: brightness(1.3);
+    transform: scale(1.15);
+    filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
   }
 }
 
@@ -486,25 +540,39 @@ body {
   animation: dropBounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-@keyframes drop {
+@keyframes dropBounce {
   0% {
-    transform: translateY(-500px);
+    transform: translateY(-600px);
+    opacity: 0;
   }
-
-  60% {
-    transform: translateY(10px);
+  50% {
+    transform: translateY(0);
+    opacity: 1;
   }
-
+  65% {
+    transform: translateY(-20px);
+  }
   80% {
+    transform: translateY(0);
+  }
+  90% {
     transform: translateY(-5px);
   }
-
   100% {
     transform: translateY(0);
   }
 }
 
-/* Move History Panel - Right Side */
+.piece.ghost {
+  opacity: 0.3;
+  transform: scale(0.9);
+  border: 2px dashed var(--color-text-secondary);
+  box-shadow: none;
+  filter: grayscale(0.5);
+  transition: all 0.2s ease;
+}
+
+/* Move History Panel */
 .move-history-panel {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
@@ -567,7 +635,6 @@ body {
   transition: var(--transition-fast);
 }
 
-
 .move-item:hover {
   background: rgba(168, 85, 247, 0.1);
   border-color: var(--color-accent-purple);
@@ -585,7 +652,6 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
-
   to {
     opacity: 1;
     transform: translateX(0);
@@ -597,7 +663,6 @@ body {
     opacity: 0;
     transform: scale(0.8);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
@@ -609,9 +674,9 @@ body {
   animation: scaleIn 0.5s ease forwards;
 }
 
+/* Winner Modal */
 .winner-modal {
   display: none;
-  /* CRITICAL: Hidden by default */
   position: fixed;
   top: 0;
   left: 0;
@@ -619,7 +684,6 @@ body {
   height: 100%;
   background: rgba(0, 0, 0, 0.85);
   z-index: 10000;
-  /* Ensure it's above everything */
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
@@ -627,7 +691,6 @@ body {
 
 .winner-modal.show {
   display: flex !important;
-  /* Only show when .show class is added */
 }
 
 .winner-content {
@@ -647,7 +710,6 @@ body {
     opacity: 0;
     transform: scale(0.8) translateY(-50px);
   }
-
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -659,7 +721,7 @@ body {
   height: 100px;
   margin: 0 auto var(--spacing-md);
   border-radius: var(--radius-full);
-  animation: winPulse 1s ease infinite;
+  animation: winPulseEnhanced 1s ease infinite;
 }
 
 .winner-icon.red {
@@ -703,9 +765,7 @@ body {
 }
 
 .winner-icon.draw {
-  background: linear-gradient(135deg,
-      var(--color-accent-red) 0%,
-      var(--color-accent-yellow) 100%);
+  background: linear-gradient(135deg, var(--color-accent-red) 0%, var(--color-accent-yellow) 100%);
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
 }
 
@@ -754,12 +814,9 @@ body {
 }
 
 @keyframes pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
-
   50% {
     opacity: 0.8;
   }
@@ -774,58 +831,36 @@ body {
   font-size: 0.875rem;
 }
 
-/* Prevent horizontal scrolling globally */
-html {
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-body {
-  overflow-x: hidden;
-  max-width: 100vw;
-  position: relative;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-/* Ensure board wrapper doesn't overflow */
-.board-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
   overflow: hidden;
 }
 
-.board {
-  max-width: 100%;
-  box-sizing: border-box;
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+  }
 }
 
 /* =========================================
-   RESPONSIVE DESIGN - NO SCROLLING
+   RESPONSIVE DESIGN
    ========================================= */
 
-/* Prevent any horizontal overflow */
-body {
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-.container {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* =========================================
-   RESPONSIVE DESIGN - FIX NARROW WINDOWS
-   ========================================= */
-
-/* Large screens - slightly reduce */
 @media (max-width: 1400px) {
   .game-container {
     grid-template-columns: 260px auto 260px;
@@ -853,7 +888,6 @@ body {
   }
 }
 
-/* Medium screens - further reduction */
 @media (max-width: 1300px) {
   .game-container {
     grid-template-columns: 240px auto 240px;
@@ -885,7 +919,6 @@ body {
   }
 }
 
-/* Smaller medium screens */
 @media (max-width: 1200px) {
   .game-container {
     grid-template-columns: 220px auto 220px;
@@ -918,17 +951,14 @@ body {
   }
 }
 
-/* CRITICAL: Switch to single column EARLIER at 1150px */
 @media (max-width: 1150px) {
   .game-container {
     grid-template-columns: 1fr !important;
-    /* Force single column */
     gap: 1rem;
     padding: 0.5rem;
     max-width: 100%;
   }
 
-  /* Remove sticky positioning */
   .game-info,
   .move-history-panel {
     position: static !important;
@@ -953,7 +983,6 @@ body {
     max-width: 100%;
   }
 
-  /* Board can be normal size again since it's centered */
   .cell {
     width: 54px;
     height: 54px;
@@ -974,7 +1003,6 @@ body {
   }
 }
 
-/* Tablets - Continue reducing */
 @media (max-width: 900px) {
   .cell {
     width: 50px;
@@ -993,278 +1021,5 @@ body {
 
   .column {
     gap: 10px;
-  }
-}
-
-/* Tablet portrait */
-@media (max-width: 768px) {
-  body {
-    padding: 0.5rem;
-  }
-
-  .header {
-    margin-bottom: 1rem;
-  }
-
-  .title {
-    font-size: 2.25rem;
-  }
-
-  .subtitle {
-    font-size: 0.95rem;
-  }
-
-  .game-container {
-    gap: 0.75rem;
-    padding: 0.25rem;
-  }
-
-  .cell {
-    width: 45px;
-    height: 45px;
-  }
-
-  .piece {
-    width: 40px;
-    height: 40px;
-  }
-
-  .board {
-    gap: 9px;
-    padding: 1rem;
-  }
-
-  .column {
-    gap: 9px;
-    padding: 3px;
-  }
-
-  .status-panel,
-  .move-history-panel {
-    padding: 1rem;
-  }
-
-  .player-piece {
-    width: 28px;
-    height: 28px;
-  }
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-  body {
-    padding: 0.375rem;
-  }
-
-  .header {
-    margin-bottom: 0.75rem;
-  }
-
-  .title {
-    font-size: 1.875rem;
-  }
-
-  .subtitle {
-    font-size: 0.875rem;
-  }
-
-  .game-container {
-    gap: 0.625rem;
-    padding: 0;
-  }
-
-  .board-wrapper {
-    padding: 0;
-  }
-
-  .cell {
-    width: 38px;
-    height: 38px;
-  }
-
-  .piece {
-    width: 34px;
-    height: 34px;
-  }
-
-  .board {
-    gap: 7px;
-    padding: 0.75rem;
-  }
-
-  .column {
-    gap: 7px;
-    padding: 2px;
-  }
-
-  .status-panel,
-  .move-history-panel {
-    padding: 0.75rem;
-  }
-
-  .panel-title {
-    font-size: 1rem;
-  }
-
-  .player-badge span {
-    font-size: 0.95rem;
-  }
-
-  .player-piece {
-    width: 24px;
-    height: 24px;
-  }
-
-  .btn {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.875rem;
-  }
-
-  .move-history-panel {
-    height: 150px;
-  }
-
-  .footer {
-    margin-top: 1rem;
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-}
-
-/* Small mobile */
-@media (max-width: 375px) {
-  .title {
-    font-size: 1.625rem;
-  }
-
-  .cell {
-    width: 34px;
-    height: 34px;
-  }
-
-  .piece {
-    width: 30px;
-    height: 30px;
-  }
-
-  .board {
-    gap: 6px;
-    padding: 0.625rem;
-  }
-
-  .column {
-    gap: 6px;
-    padding: 1px;
-  }
-
-  .player-piece {
-    width: 22px;
-    height: 22px;
-  }
-}
-
-/* Extra small */
-@media (max-width: 320px) {
-  .cell {
-    width: 30px;
-    height: 30px;
-  }
-
-  .piece {
-    width: 27px;
-    height: 27px;
-  }
-
-  .board {
-    gap: 5px;
-    padding: 0.5rem;
-  }
-
-  .column {
-    gap: 5px;
-  }
-}
-
-/* =========================================
-   Enhanced Animations (v1.1)
-   ========================================= */
-
-@keyframes dropBounce {
-  0% {
-    transform: translateY(-600px);
-    opacity: 0;
-  }
-
-  50% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  65% {
-    transform: translateY(-20px);
-  }
-
-  80% {
-    transform: translateY(0);
-  }
-
-  90% {
-    transform: translateY(-5px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes winPulseEnhanced {
-
-  0%,
-  100% {
-    transform: scale(1);
-    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-
-  50% {
-    transform: scale(1.15);
-    filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-  }
-}
-
-/* Ghost Piece for Hover Effect */
-.piece.ghost {
-  opacity: 0.3;
-  transform: scale(0.9);
-  border: 2px dashed var(--color-text-secondary);
-  box-shadow: none;
-  filter: grayscale(0.5);
-  transition: all 0.2s ease;
-  background: var(--color-text-secondary);
-  /* Fallback */
-}
-
-/* Confetti Container */
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  overflow: hidden;
-}
-
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: #f00;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(720deg);
   }
 }
