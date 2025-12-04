@@ -273,7 +273,7 @@ class GameUI {
             winnerIcon.classList.add('draw');
             winnerTitle.textContent = "It's a Draw!";
         } else {
-            const colorClass = winner.toLowerCase();
+            const colorClass = this.getPlayerColorClass(winner);
             winnerIcon.classList.add(colorClass);
             const playerName = this.playerNames?.[winner] || winner;
             winnerTitle.textContent = `${playerName} Wins!`;
