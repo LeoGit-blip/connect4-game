@@ -149,10 +149,10 @@ class GameLogic {
     formatGameResponse(game) {
         return {
             gameId: game.id,
-            board: game.board,
+            board: game.board.map(row => [...row]),
             status: game.status,
             currentPlayer: game.currentPlayer,
-            moveHistory: game.moveHistory,
+            moveHistory: [...game.moveHistory],
             config: game.config,
             isAITurn: game.config.gameMode === 'PLAYER_VS_AI' &&
                 game.status === 'IN_PROGRESS' &&
