@@ -837,7 +837,7 @@ body {
 /* Large screens - full 3 column layout */
 @media (max-width: 1400px) {
   .game-container {
-    grid-template-columns: minmax(250px, 300px) auto minmax(250px, 300px);
+    grid-template-columns: minmax(260px, 300px) auto minmax(260px, 300px);
     gap: var(--spacing-md);
     padding: var(--spacing-sm);
   }
@@ -845,7 +845,7 @@ body {
 
 @media (max-width: 1200px) {
   .game-container {
-    grid-template-columns: minmax(220px, 260px) auto minmax(220px, 260px);
+    grid-template-columns: minmax(230px, 260px) auto minmax(230px, 260px);
     gap: var(--spacing-md);
   }
 
