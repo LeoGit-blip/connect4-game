@@ -833,19 +833,32 @@ body {
   font-size: 0.875rem;
 }
 
-/* Responsive Design */
+/* =========================================
+   RESPONSIVE DESIGN - Fixed
+   ========================================= */
+
 /* Large screens - full 3 column layout */
 @media (max-width: 1400px) {
   .game-container {
-    grid-template-columns: minmax(260px, 300px) auto minmax(260px, 300px);
+    grid-template-columns: minmax(250px, 300px) auto minmax(250px, 300px);
     gap: var(--spacing-md);
     padding: var(--spacing-sm);
+  }
+
+  .cell {
+    width: 60px;
+    height: 60px;
+  }
+
+  .piece {
+    width: 52px;
+    height: 52px;
   }
 }
 
 @media (max-width: 1200px) {
   .game-container {
-    grid-template-columns: minmax(230px, 260px) auto minmax(230px, 260px);
+    grid-template-columns: minmax(220px, 260px) auto minmax(220px, 260px);
     gap: var(--spacing-md);
   }
 
@@ -869,20 +882,41 @@ body {
   }
 }
 
-/* Medium screens - reduce sidebar size further */
+/* CRITICAL: Switch to single column layout on medium screens */
 @media (max-width: 1024px) {
   .game-container {
     grid-template-columns: 1fr;
+    /* Single column */
     gap: var(--spacing-lg);
+    max-width: 700px;
+    /* Constrain width */
+    margin: 0 auto;
+  }
+
+  /* Side panels now stack vertically */
+  .game-info,
+  .move-history-panel {
+    position: static;
+    /* Remove sticky positioning */
+    width: 100%;
+    max-width: 100%;
   }
 
   .move-history-panel {
-    height: 300px;
-    position: static;
+    height: 250px;
+    /* Shorter on mobile */
+    order: 3;
+    /* Move to bottom */
+  }
+
+  .board-wrapper {
+    order: 2;
+    /* Board in middle */
   }
 
   .game-info {
-    position: static;
+    order: 1;
+    /* Controls on top */
   }
 
   .cell {
@@ -907,6 +941,10 @@ body {
     padding: var(--spacing-sm);
   }
 
+  .container {
+    max-width: 100%;
+  }
+
   .header {
     margin-bottom: var(--spacing-lg);
   }
@@ -917,6 +955,11 @@ body {
 
   .subtitle {
     font-size: 1rem;
+  }
+
+  .game-container {
+    padding: 0;
+    gap: var(--spacing-md);
   }
 
   .cell {
@@ -934,9 +977,17 @@ body {
     padding: var(--spacing-md);
   }
 
+  .column {
+    gap: 10px;
+  }
+
   .status-panel,
   .move-history-panel {
     padding: var(--spacing-md);
+  }
+
+  .move-history-panel {
+    height: 200px;
   }
 }
 
@@ -956,6 +1007,10 @@ body {
 
   .subtitle {
     font-size: 0.875rem;
+  }
+
+  .game-container {
+    gap: var(--spacing-sm);
   }
 
   .cell {
@@ -978,11 +1033,6 @@ body {
     padding: 4px;
   }
 
-  .game-container {
-    gap: var(--spacing-md);
-    padding: 0;
-  }
-
   .status-panel,
   .move-history-panel {
     padding: var(--spacing-sm);
@@ -996,9 +1046,18 @@ body {
     font-size: 1rem;
   }
 
+  .player-piece {
+    width: 28px;
+    height: 28px;
+  }
+
   .btn {
     font-size: 0.875rem;
     padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .move-history-panel {
+    height: 180px;
   }
 }
 
@@ -1026,6 +1085,11 @@ body {
   .column {
     gap: 6px;
     padding: 2px;
+  }
+
+  .player-piece {
+    width: 24px;
+    height: 24px;
   }
 }
 
