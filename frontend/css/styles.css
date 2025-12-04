@@ -626,6 +626,7 @@ body {
   transition: var(--transition-fast);
 }
 
+
 .move-item:hover {
   background: rgba(168, 85, 247, 0.1);
   border-color: var(--color-accent-purple);
@@ -650,7 +651,9 @@ body {
   }
 }
 
-.game-id-text {
+@keyframes scaleIn {
+  from {
+    opacity: 0;
     transform: scale(0.8);
   }
 
@@ -658,6 +661,11 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.game-id-text {
+  display: inline-block;
+  animation: scaleIn 0.5s ease forwards;
 }
 
 .winner-icon {
