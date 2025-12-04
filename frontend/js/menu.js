@@ -525,7 +525,7 @@ class MenuController {
 
     // Navigate to game with configuration
     const configParam = encodeURIComponent(JSON.stringify(config));
-    window.location.href = `index.html?config=${configParam}`;
+    window.location.href = `game.html?config=${configParam}`;
   }
 
   /**

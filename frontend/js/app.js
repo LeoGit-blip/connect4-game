@@ -51,7 +51,7 @@ class App {
         } else {
             // This should rarely happen now as loadGameConfig returns defaults
             console.warn('No configuration found, redirecting to menu');
-            window.location.href = 'menu.html';
+            window.location.href = 'index.html';
         }
     }
 
@@ -77,7 +77,7 @@ class App {
         if (menuBtn) {
             menuBtn.addEventListener('click', () => {
                 window.audioManager.playButtonClick();
-                window.location.href = 'menu.html';
+                window.location.href = 'index.html';
             });
         }
 
@@ -86,7 +86,7 @@ class App {
         if (playAgainBtn) {
             playAgainBtn.addEventListener('click', () => {
                 window.audioManager.playButtonClick();
-                window.location.href = 'menu.html';
+                window.location.href = 'index.html';
             });
         }
 
