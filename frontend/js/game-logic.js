@@ -208,10 +208,7 @@ class GameLogic {
             if (setupMove !== -1) return setupMove;
         }
 
-        // 3. Prefer center column
-        if (validMoves.includes(3)) return 3;
-
-        // 4. Prefer columns near center
+        // 3. Prefer columns near center (not always center!)
         const centerPreference = [3, 2, 4, 1, 5, 0, 6];
         for (let col of centerPreference) {
             if (validMoves.includes(col)) return col;
