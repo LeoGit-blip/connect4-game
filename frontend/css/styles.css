@@ -415,6 +415,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  overflow-x: auto;
+  /* Allow horizontal scroll if needed on very small screens */
 }
 
 .board {
