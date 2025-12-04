@@ -651,45 +651,6 @@ body {
 }
 
 .game-id-text {
-  font-family: "Courier New", monospace;
-  color: var(--color-accent-blue);
-  font-weight: 600;
-}
-
-/* Winner Modal */
-.winner-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 14, 39, 0.95);
-  backdrop-filter: blur(10px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-.winner-modal.show {
-  display: flex;
-}
-
-.winner-content {
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-width: 400px;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
     transform: scale(0.8);
   }
 
