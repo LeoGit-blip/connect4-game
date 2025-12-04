@@ -11,13 +11,21 @@ class GameLogic {
     }
 
     createGame(config) {
+        // Normalize config to handle both backend-style (player1Config) and frontend-style (player1)
+        // The app sends player1Config/player2Config via buildConfigRequest
+        const normalizedConfig = {
+            ...config,
+            player1: config.player1 || config.player1Config,
+            player2: config.player2 || config.player2Config
+        };
+
         const gameId = 'local_' + Date.now();
         const game = {
             id: gameId,
             board: Array(this.ROWS).fill().map(() => Array(this.COLS).fill(null)),
             currentPlayer: config.firstPlayer || 'RED',
             status: 'IN_PROGRESS',
-            config: config,
+            config: normalizedConfig,
             moveHistory: [],
             winner: null
         };
