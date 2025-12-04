@@ -1,9 +1,7 @@
 /**
- * API Client for Connect 4 Backend
- * Handles all HTTP requests to the Java backend
+ * API Client for Connect 4 (Local Version)
+ * Adapts the frontend to use local game logic instead of a backend
  */
-
-const API_BASE_URL = 'http://localhost:8080/api/games';
 
 class ApiClient {
     /**
@@ -11,23 +9,12 @@ class ApiClient {
      * @returns {Promise<Object>} Game response
      */
     async createGame() {
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error creating game:', error);
-            throw error;
-        }
+        return localGameLogic.createGame({
+            gameMode: 'PLAYER_VS_PLAYER',
+            player1: { name: 'Player 1', color: '#ff0040', isAI: false },
+            player2: { name: 'Player 2', color: '#ffd700', isAI: false },
+            firstPlayer: 'RED'
+        });
     }
 
     /**
@@ -36,18 +23,7 @@ class ApiClient {
      * @returns {Promise<Object>} Game response
      */
     async getGame(gameId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error getting game:', error);
-            throw error;
-        }
+        return localGameLogic.getGame(gameId);
     }
 
     /**
@@ -57,25 +33,7 @@ class ApiClient {
      * @returns {Promise<Object>} Move response
      */
     async makeMove(gameId, column) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}/move`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ column })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error making move:', error);
-            throw error;
-        }
+        return localGameLogic.makeMove(gameId, column);
     }
 
     /**
@@ -84,23 +42,9 @@ class ApiClient {
      * @returns {Promise<Object>} Game response
      */
     async resetGame(gameId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}/reset`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error resetting game:', error);
-            throw error;
-        }
+        // For local, just create a new game with same config
+        const oldGame = localGameLogic.getGame(gameId);
+        return localGameLogic.createGame(oldGame.config);
     }
 
     /**
@@ -109,18 +53,7 @@ class ApiClient {
      * @returns {Promise<void>}
      */
     async deleteGame(gameId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Error deleting game:', error);
-            throw error;
-        }
+        // No-op for local
     }
 
     /**
@@ -129,25 +62,7 @@ class ApiClient {
      * @returns {Promise<Object>} Game response
      */
     async createGameWithConfig(config) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/configured`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(config)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error creating configured game:', error);
-            throw error;
-        }
+        return localGameLogic.createGame(config);
     }
 
     /**
@@ -156,24 +71,8 @@ class ApiClient {
      * @returns {Promise<Object>} AI move response
      */
     async requestAIMove(gameId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}/ai-move`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error requesting AI move:', error);
-            throw error;
-        }
+        const column = localGameLogic.getAIMove(gameId);
+        return { column };
     }
 
     /**
@@ -182,24 +81,8 @@ class ApiClient {
      * @returns {Promise<Object>} Move response
      */
     async executeAIMove(gameId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${gameId}/ai-move/execute`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error executing AI move:', error);
-            throw error;
-        }
+        const column = localGameLogic.getAIMove(gameId);
+        return localGameLogic.makeMove(gameId, column);
     }
 }
 
