@@ -141,8 +141,14 @@ class App {
 
             // Setup color mapping
             if (this.gameConfig.player1 && this.gameConfig.player2) {
-                gameUI.setupColorMapping(this.gameConfig.player1.color, this.gameConfig.player2.color);
-                gameUI.updatePlayerNames(this.gameConfig.player1.name, this.gameConfig.player2.name);
+                gameUI.setupColorMapping(
+                    this.gameConfig.player1.color,
+                    this.gameConfig.player2.color
+                );
+                gameUI.updatePlayerNames(
+                    this.gameConfig.player1.name,
+                    this.gameConfig.player2.name
+                );
             }
 
             this.updateUI(response);

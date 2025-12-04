@@ -217,6 +217,7 @@ class GameLogic {
         const modal = document.getElementById('winnerModal');
         const winnerIcon = document.getElementById('winnerIcon');
         const winnerTitle = document.getElementById('winnerTitle');
+        const winnerMessage = document.querySelector('.winner-message');
 
         if (!modal) return;
 
@@ -226,11 +227,30 @@ class GameLogic {
         if (winner === 'DRAW') {
             winnerIcon.classList.add('draw');
             winnerTitle.textContent = "It's a Draw!";
+            winnerMessage.textContent = "Great game! Try again?";
         } else {
-            const colorClass = winner.toLowerCase();
-            winnerIcon.classList.add(colorClass);
-            const playerName = this.playerNames?.[winner] || winner;
+            // CRITICAL FIX: Get the actual color from the game config
+            let winnerColor = winner.toLowerCase(); // Default to RED/YELLOW
+
+            // Get the actual player color from the current game state
+            if (this.currentGameState && this.currentGameState.config) {
+                const config = this.currentGameState.config;
+
+                // Check if winner is RED or YELLOW and get their actual chosen color
+                if (winner === 'RED' && config.player1) {
+                    winnerColor = config.player1.color.toLowerCase();
+                } else if (winner === 'YELLOW' && config.player2) {
+                    winnerColor = config.player2.color.toLowerCase();
+                }
+            }
+
+            // Apply the correct color class
+            winnerIcon.classList.add(winnerColor);
+
+            // Get player name if available
+            const playerName = this.getPlayerName(winner);
             winnerTitle.textContent = `${playerName} Wins!`;
+            winnerMessage.textContent = "Congratulations on your victory!";
         }
 
         // Show modal with animation
@@ -238,6 +258,22 @@ class GameLogic {
         setTimeout(() => {
             modal.classList.add('show');
         }, 10);
+    }
+
+    getPlayerName(player) {
+        if (!this.currentGameState || !this.currentGameState.config) {
+            return player === 'RED' ? 'Player 1' : 'Player 2';
+        }
+
+        const config = this.currentGameState.config;
+
+        if (player === 'RED' && config.player1) {
+            return config.player1.name || 'Player 1';
+        } else if (player === 'YELLOW' && config.player2) {
+            return config.player2.name || 'Player 2';
+        }
+
+        return player;
     }
 
     // Method to hide winner modal
