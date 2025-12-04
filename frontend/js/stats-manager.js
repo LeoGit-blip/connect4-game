@@ -29,6 +29,10 @@ class StatsManager {
         // Cleanup invalid stats (RED/YELLOW keys from bug)
         this.cleanupInvalidStats();
 
+        if (!this.stats) {
+            this.stats = this.getDefaultStats();
+        }
+
         return this.stats;
     }
 
@@ -129,6 +133,9 @@ class StatsManager {
      * @returns {Object} Player stats
      */
     getPlayerStats(playerName) {
+        if (!this.stats || !this.stats.players) {
+            this.stats = this.getDefaultStats();
+        }
         if (!this.stats.players[playerName]) {
             this.stats.players[playerName] = this.getDefaultPlayerStats();
         }
