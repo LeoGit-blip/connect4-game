@@ -161,7 +161,7 @@ class GameLogic {
         };
     }
 
-    // AI implementation with difficulty levels
+    // AI implementation with enhanced difficulty levels
     getAIMove(gameId) {
         const game = this.games.get(gameId);
         if (!game) throw new Error('Game not found');
@@ -176,22 +176,17 @@ class GameLogic {
         // Get difficulty level from config (default to MEDIUM)
         const difficulty = game.config?.aiDifficulty || 'MEDIUM';
 
-        // EXPERT and GRANDMASTER: Use minimax algorithm
-        if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
-            const depth = difficulty === 'EXPERT' ? 7 : 8;
-            return this.minimaxMove(game.board, game.currentPlayer, depth, validMoves);
-        }
-
-        // EASY: 40% chance of random move, otherwise strategic
-        if (difficulty === 'EASY') {
-            if (Math.random() < 0.4) {
-                return validMoves[Math.floor(Math.random() * validMoves.length)];
+        // 1. Check opening book for first few moves
+        const moveCount = game.moveHistory.length;
+        if (moveCount <= 4 && (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER')) {
+            const openingMove = this.getOpeningMove(game.board, moveCount);
+            if (openingMove !== null) {
+                console.log('AI using opening book:', openingMove);
+                return openingMove;
             }
         }
 
-        // Strategic moves (used by EASY 60%, MEDIUM 100%, HARD 100%)
-
-        // 1. Check for winning move
+        // 2. Check for immediate winning move
         for (let col of validMoves) {
             if (this.canWin(game.board, col, game.currentPlayer)) {
                 console.log('AI found winning move:', col);
@@ -199,12 +194,25 @@ class GameLogic {
             }
         }
 
-        // 2. Check for blocking move
+        // 3. Check for blocking opponent's winning move
         const opponent = game.currentPlayer === 'RED' ? 'YELLOW' : 'RED';
         for (let col of validMoves) {
             if (this.canWin(game.board, col, opponent)) {
                 console.log('AI blocking opponent at:', col);
                 return col;
+            }
+        }
+
+        // 4. Use minimax for EXPERT and GRANDMASTER
+        if (difficulty === 'EXPERT' || difficulty === 'GRANDMASTER') {
+            const depth = difficulty === 'EXPERT' ? 10 : 14; // Grandmaster: depth 14!
+            return this.minimaxMove(game.board, game.currentPlayer, depth, validMoves);
+        }
+
+        // EASY: 40% chance of random move, otherwise strategic
+        if (difficulty === 'EASY') {
+            if (Math.random() < 0.4) {
+                return validMoves[Math.floor(Math.random() * validMoves.length)];
             }
         }
 
@@ -217,7 +225,7 @@ class GameLogic {
             }
         }
 
-        // 3. Intelligent column selection with some randomness
+        // 5. Intelligent column selection with some randomness
         // Score each valid column and pick the best one
         let columnScores = validMoves.map(col => {
             let score = 0;
@@ -238,6 +246,37 @@ class GameLogic {
 
         console.log('AI strategic move:', bestMove, 'scores:', columnScores);
         return bestMove;
+    }
+
+    // Opening book for strong opening play
+    getOpeningMove(board, moveCount) {
+        // First move: always play center
+        if (moveCount === 0) {
+            return 3;
+        }
+
+        // Count pieces in each column (simple board state representation)
+        const colCounts = [];
+        for (let c = 0; c < this.COLS; c++) {
+            let count = 0;
+            for (let r = 0; r < this.ROWS; r++) {
+                if (board[r][c] !== null) count++;
+            }
+            colCounts.push(count);
+        }
+
+        // If opponent played center, play adjacent
+        if (moveCount === 1 && colCounts[3] === 1) {
+            return Math.random() < 0.5 ? 2 : 4;
+        }
+
+        // If opponent didn't play center, take it
+        if (moveCount === 1 && colCounts[3] === 0) {
+            return 3;
+        }
+
+        // For later moves, return null to use minimax
+        return null;
     }
 
     // Minimax algorithm for EXPERT and GRANDMASTER
@@ -351,21 +390,83 @@ class GameLogic {
         return board[0].every(cell => cell !== null);
     }
 
-    // Evaluate board position for minimax
+    // Enhanced evaluation function for board positions
     evaluateBoard(board, player) {
         const opponent = player === 'RED' ? 'YELLOW' : 'RED';
         let score = 0;
 
-        // Score center column control
-        for (let r = 0; r < this.ROWS; r++) {
-            if (board[r][3] === player) score += 3;
-            else if (board[r][3] === opponent) score -= 3;
-        }
-
-        // Score potential winning positions
+        // 1. Score potential winning positions (windows)
         score += this.scorePosition(board, player) - this.scorePosition(board, opponent);
 
+        // 2. Center column control (very important in Connect4)
+        const centerCol = 3;
+        let centerCount = 0;
+        for (let r = 0; r < this.ROWS; r++) {
+            if (board[r][centerCol] === player) {
+                centerCount++;
+                score += 5; // Bonus for each piece in center
+            } else if (board[r][centerCol] === opponent) {
+                score -= 3; // Penalty for opponent center control
+            }
+        }
+        
+        // Extra bonus for strong center control
+        if (centerCount >= 3) {
+            score += 10;
+        }
+
+        // 3. Connectivity bonus - reward connected pieces
+        score += this.evaluateConnectivity(board, player) - this.evaluateConnectivity(board, opponent);
+
+        // 4. Positional scoring - prefer lower rows and center columns
+        const COLUMN_WEIGHTS = [3, 4, 5, 7, 5, 4, 3];
+        for (let r = 0; r < this.ROWS; r++) {
+            for (let c = 0; c < this.COLS; c++) {
+                if (board[r][c] === player) {
+                    // Prefer pieces in lower rows (more stable)
+                    score += (this.ROWS - r);
+                    
+                    // Prefer center columns
+                    score += COLUMN_WEIGHTS[c];
+                }
+            }
+        }
+
         return score;
+    }
+
+    // Evaluate connectivity - how well pieces are connected
+    evaluateConnectivity(board, player) {
+        let connectivity = 0;
+        
+        for (let r = 0; r < this.ROWS; r++) {
+            for (let c = 0; c < this.COLS; c++) {
+                if (board[r][c] === player) {
+                    let adjacentCount = 0;
+                    
+                    // Check all 8 directions
+                    const directions = [
+                        [-1, -1], [-1, 0], [-1, 1],
+                        [0, -1],           [0, 1],
+                        [1, -1],  [1, 0],  [1, 1]
+                    ];
+                    
+                    for (let [dr, dc] of directions) {
+                        const nr = r + dr;
+                        const nc = c + dc;
+                        if (nr >= 0 && nr < this.ROWS && nc >= 0 && nc < this.COLS) {
+                            if (board[nr][nc] === player) {
+                                adjacentCount++;
+                            }
+                        }
+                    }
+                    
+                    connectivity += adjacentCount * 2; // Bonus for each connection
+                }
+            }
+        }
+        
+        return connectivity;
     }
 
     // Score potential winning positions
@@ -401,19 +502,39 @@ class GameLogic {
         return score;
     }
 
-    // Evaluate a window of 4 cells
+    // Enhanced window evaluation with better threat scoring
     evaluateWindow(window, player) {
         const opponent = player === 'RED' ? 'YELLOW' : 'RED';
         const playerCount = window.filter(cell => cell === player).length;
         const opponentCount = window.filter(cell => cell === opponent).length;
         const emptyCount = window.filter(cell => cell === null).length;
 
-        if (playerCount === 4) return 100;
-        if (playerCount === 3 && emptyCount === 1) return 5;
-        if (playerCount === 2 && emptyCount === 2) return 2;
-        if (opponentCount === 3 && emptyCount === 1) return -4; // Block opponent
+        // Can't use window if both players have pieces
+        if (playerCount > 0 && opponentCount > 0) {
+            return 0;
+        }
 
-        return 0;
+        let score = 0;
+
+        // Score player's pieces
+        if (playerCount === 4) {
+            score += 100000; // Win
+        } else if (playerCount === 3 && emptyCount === 1) {
+            score += 150; // Strong threat (increased from 5)
+        } else if (playerCount === 2 && emptyCount === 2) {
+            score += 15; // Setup (increased from 2)
+        } else if (playerCount === 1 && emptyCount === 3) {
+            score += 2; // Potential
+        }
+
+        // Penalize opponent threats more aggressively
+        if (opponentCount === 3 && emptyCount === 1) {
+            score -= 120; // Must block (increased from 4)
+        } else if (opponentCount === 2 && emptyCount === 2) {
+            score -= 10; // Watch opponent
+        }
+
+        return score;
     }
 
     // Find a move that sets up future winning opportunities (for HARD mode)

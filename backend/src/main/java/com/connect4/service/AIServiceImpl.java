@@ -63,7 +63,7 @@ public class AIServiceImpl implements AIService {
         int evaluationScore;
         String reasoning;
 
-        // Calculate move based on difficulty
+        // Calculate move based on difficulty - GRANDMASTER FOCUSED
         switch (difficulty) {
             case EASY:
                 // 50% random, 50% smart move with low depth
@@ -78,47 +78,55 @@ public class AIServiceImpl implements AIService {
                 }
                 break;
 
+            case MEDIUM:
+                // Depth 5 - decent tactical play
+                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 5);
+                evaluationScore = minimaxEngine.evaluatePosition(game.getBoard(), aiPlayer);
+                reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer, "Good position (Medium mode)");
+                break;
+
             case HARD:
-                // Full minimax with depth 6
-                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 6);
+                // Depth 8 - strong tactical play with improved evaluation
+                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 8);
                 evaluationScore = minimaxEngine.evaluatePosition(game.getBoard(), aiPlayer);
                 reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer, "Strategic position (Hard mode)");
                 break;
 
             case EXPERT:
-                // Depth 8 - significantly stronger
-                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 8);
+                // Depth 10 - very strong with threat detection
+                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 10);
                 evaluationScore = minimaxEngine.evaluatePosition(game.getBoard(), aiPlayer);
                 reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer, "Calculated move (Expert mode)");
                 break;
 
             case GRANDMASTER:
-                // Depth 10 - very strong, might be slow
-                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 10);
+                // Depth 14 - MAXIMUM DIFFICULTY with all advanced features
+                // Uses iterative deepening, transposition tables, threat detection, opening
+                // book
+                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 14);
                 evaluationScore = minimaxEngine.evaluatePosition(game.getBoard(), aiPlayer);
-                reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer, "Deep analysis (Grandmaster)");
+                reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer,
+                        "Deep strategic analysis (Grandmaster)");
                 break;
 
-            case MEDIUM:
             default:
-                // Minimax with depth 4
-                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 4);
+                // Fallback to medium
+                bestColumn = minimaxEngine.findBestMove(game.getBoard(), aiPlayer, 5);
                 evaluationScore = minimaxEngine.evaluatePosition(game.getBoard(), aiPlayer);
-
-                reasoning = getReasoning(game.getBoard(), bestColumn, aiPlayer, "Good position (Medium mode)");
+                reasoning = "Standard move";
                 break;
         }
 
         long endTime = System.currentTimeMillis();
         int thinkingTime = (int) (endTime - startTime);
 
-        // Simulate minimum thinking time for better UX
+        // Simulate minimum thinking time for better UX - GRANDMASTER gets more time
         int minThinkingTime = switch (difficulty) {
             case EASY -> 100;
             case MEDIUM -> 300;
-            case HARD -> 500;
-            case EXPERT -> 800;
-            case GRANDMASTER -> 1000;
+            case HARD -> 600;
+            case EXPERT -> 1000;
+            case GRANDMASTER -> 1500; // Grandmaster takes time to think deeply
         };
 
         thinkingTime = Math.max(thinkingTime, minThinkingTime);
