@@ -248,10 +248,11 @@
 }
 
 .color-circle {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
 }
 
 .color-circle.red {
@@ -1262,8 +1263,8 @@ body {
     }
 
     .color-circle {
-        width: 12px;
-        height: 12px;
+        width: 16px;
+        height: 16px;
     }
 
     .difficulty-btn {
