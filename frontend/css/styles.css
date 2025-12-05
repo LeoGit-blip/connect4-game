@@ -752,16 +752,6 @@ body {
   box-shadow: var(--shadow-glow-green);
 }
 
-.winner-icon.black {
-  background: var(--gradient-black);
-  box-shadow: var(--shadow-glow-black);
-}
-
-.winner-icon.purple {
-  background: var(--gradient-purple);
-  box-shadow: var(--shadow-glow-purple);
-}
-
 .winner-icon.orange {
   background: var(--gradient-orange);
   box-shadow: var(--shadow-glow-orange);
@@ -772,6 +762,113 @@ body {
   box-shadow: var(--shadow-glow-pink);
 }
 
+.winner-icon.draw {
+  background: linear-gradient(135deg, var(--color-accent-red) 0%, var(--color-accent-yellow) 100%);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.winner-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-sm);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.winner-message {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xl);
+  font-size: 1.1rem;
+}
+
+.winner-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-lg);
+}
+
+.winner-buttons .btn {
+  flex: 1;
+  min-width: 160px;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.winner-buttons .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.winner-buttons .btn:hover::before {
+  left: 100%;
+}
+
+.winner-buttons .btn-primary {
+  background: var(--gradient-primary);
+  border: none;
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
+}
+
+.winner-buttons .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.6);
+}
+
+.winner-buttons .btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.winner-buttons .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-accent-purple);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+}
+
+.winner-buttons .btn svg {
+  flex-shrink: 0;
+}
+
+/* AI Thinking Indicator */
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(168, 85, 247, 0.15);
+  border: 2px solid var(--color-accent-purple);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.ai-thinking.hidden {
+  display: none;
+}
+
 .ai-thinking-spinner {
   width: 20px;
   height: 20px;
@@ -779,12 +876,6 @@ body {
   border-top-color: var(--color-accent-purple);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @keyframes pulse {
