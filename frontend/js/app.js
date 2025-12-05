@@ -124,7 +124,9 @@ class App {
         const winnerModal = document.getElementById('winnerModal');
 
         if (viewBoardBtn && winnerModal) {
-            viewBoardBtn.addEventListener('click', () => {
+            viewBoardBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                console.log('View Board clicked!');
                 window.audioManager.playButtonClick();
                 winnerModal.classList.add('minimized');
             });
@@ -132,10 +134,13 @@ class App {
             // Click on minimized modal to expand it again
             winnerModal.addEventListener('click', (e) => {
                 if (winnerModal.classList.contains('minimized') && !e.target.closest('.btn')) {
+                    console.log('Expanding modal');
                     window.audioManager.playButtonClick();
                     winnerModal.classList.remove('minimized');
                 }
             });
+        } else {
+            console.log('View Board button or modal not found:', { viewBoardBtn, winnerModal });
         }
 
         const volumeSlider = document.getElementById('volumeSlider');
