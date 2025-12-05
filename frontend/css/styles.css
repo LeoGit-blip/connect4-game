@@ -778,21 +778,6 @@ body {
 }
 
 .winner-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: var(--spacing-sm);
-}
-
-.winner-message {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-lg);
-}
-
-/* AI Thinking Indicator */
-.ai-thinking {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   background: rgba(168, 85, 247, 0.15);

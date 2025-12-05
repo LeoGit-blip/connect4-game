@@ -83,14 +83,32 @@ class App {
             });
         }
 
-        // Play again button in modal
+
+        // Play again button in modal - restart game with same config
         const playAgainBtn = document.getElementById('playAgainBtn');
         if (playAgainBtn) {
-            playAgainBtn.addEventListener('click', () => {
+            playAgainBtn.addEventListener('click', async () => {
+                window.audioManager.playButtonClick();
+                // Hide the modal
+                const modal = document.getElementById('winnerModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                }
+                // Restart the game with the same configuration
+                await this.createConfiguredGame();
+            });
+        }
+
+        // Back to menu button in modal
+        const backToMenuBtn = document.getElementById('backToMenuBtn');
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => {
                 window.audioManager.playButtonClick();
                 window.location.href = 'index.html';
             });
         }
+
 
         // Audio controls
         const muteBtn = document.getElementById('muteBtn');

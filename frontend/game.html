@@ -115,33 +115,31 @@
     <footer class="footer">
       <p>Game ID: <span id="gameId" class="game-id-text">Loading...</span></p>
     </footer>
-  </div>
 
-  <!-- Winner Modal -->
-  <div class="winner-modal" id="winnerModal">
-    <div class="winner-content">
-      <div class="winner-icon" id="winnerIcon"></div>
-      <h2 class="winner-title" id="winnerTitle">Red Wins!</h2>
-      <p class="winner-message">Congratulations on your victory!</p>
-      <button class="btn btn-large btn-primary" id="playAgainBtn">
-        Play Again
-      </button>
+    <!-- Winner Modal -->
+    <div class="winner-modal" id="winnerModal">
+      <div class="winner-content">
+        <div class="winner-icon" id="winnerIcon"></div>
+        <h2 class="winner-title" id="winnerTitle">Red Wins!</h2>
+        <p class="winner-message">Congratulations on your victory!</p>
+        <div class="winner-buttons">
+          <button class="btn btn-large btn-primary" id="playAgainBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Play Again
+          </button>
+          <button class="btn btn-large btn-secondary" id="backToMenuBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Back to Menu
+          </button>
+        </div>
+      </div>
     </div>
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Connect 4 - Premium Game Experience</title>
-      <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-      <link rel="stylesheet" href="css/styles.css" />
-      <link rel="stylesheet" href="css/themes.css" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    </head>
-
     <!-- Scripts -->
     <script src="js/AudioManager.js?v=1.1"></script>
     <script src="js/Confetti.js?v=1.1"></script>
