@@ -772,25 +772,6 @@ body {
   box-shadow: var(--shadow-glow-pink);
 }
 
-.winner-icon.draw {
-  background: linear-gradient(135deg, var(--color-accent-red) 0%, var(--color-accent-yellow) 100%);
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-}
-
-.winner-title {
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: rgba(168, 85, 247, 0.15);
-  border: 2px solid var(--color-accent-purple);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-sm);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.ai-thinking.hidden {
-  display: none;
-}
-
 .ai-thinking-spinner {
   width: 20px;
   height: 20px;
