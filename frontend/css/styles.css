@@ -700,6 +700,86 @@ body {
   display: flex !important;
 }
 
+/* View Board Button */
+.btn-view-board {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  margin: 0 auto 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-board:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-accent-purple);
+  transform: translateY(-2px);
+}
+
+.btn-view-board svg {
+  flex-shrink: 0;
+}
+
+/* Minimized Winner Modal (Corner Notification) */
+.winner-modal.minimized {
+  background: transparent;
+  backdrop-filter: none;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.winner-modal.minimized .winner-content {
+  max-width: 320px;
+  width: auto;
+  padding: 1.5rem;
+  animation: slideInFromRight 0.4s ease;
+  cursor: pointer;
+}
+
+.winner-modal.minimized .winner-icon {
+  width: 60px;
+  height: 60px;
+}
+
+.winner-modal.minimized .winner-title {
+  font-size: 1.5rem;
+}
+
+.winner-modal.minimized .winner-message {
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.winner-modal.minimized .btn-view-board {
+  display: none;
+}
+
+.winner-modal.minimized .winner-buttons {
+  margin-top: var(--spacing-md);
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .winner-content {
   background: var(--color-bg-secondary);
   border: 2px solid var(--color-border);

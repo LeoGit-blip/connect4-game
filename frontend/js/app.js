@@ -119,6 +119,25 @@ class App {
             });
         }
 
+        // View Board button functionality
+        const viewBoardBtn = document.getElementById('viewBoardBtn');
+        const winnerModal = document.getElementById('winnerModal');
+
+        if (viewBoardBtn && winnerModal) {
+            viewBoardBtn.addEventListener('click', () => {
+                window.audioManager.playButtonClick();
+                winnerModal.classList.add('minimized');
+            });
+
+            // Click on minimized modal to expand it again
+            winnerModal.addEventListener('click', (e) => {
+                if (winnerModal.classList.contains('minimized') && !e.target.closest('.btn')) {
+                    window.audioManager.playButtonClick();
+                    winnerModal.classList.remove('minimized');
+                }
+            });
+        }
+
         const volumeSlider = document.getElementById('volumeSlider');
         if (volumeSlider) {
             volumeSlider.addEventListener('input', (e) => {
