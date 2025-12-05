@@ -14,6 +14,42 @@
 </head>
 
 <body>
+  <!-- Global Theme Selector -->
+  <div class="theme-selector-global">
+    <button class="theme-toggle-btn" id="themeToggleBtn">
+      <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      </svg>
+      <span>Theme</span>
+    </button>
+    <div class="theme-dropdown" id="themeDropdown">
+      <button class="theme-option active" data-theme="classic">
+        <div class="theme-color-indicator classic"></div>
+        <span>Classic Dark</span>
+      </button>
+      <button class="theme-option" data-theme="ocean">
+        <div class="theme-color-indicator ocean"></div>
+        <span>Ocean Blue</span>
+      </button>
+      <button class="theme-option" data-theme="sunset">
+        <div class="theme-color-indicator sunset"></div>
+        <span>Sunset Orange</span>
+      </button>
+      <button class="theme-option" data-theme="forest">
+        <div class="theme-color-indicator forest"></div>
+        <span>Forest Green</span>
+      </button>
+    </div>
+  </div>
+
   <div class="container">
     <header class="header">
       <h1 class="title">
@@ -110,6 +146,7 @@
     <script src="js/AudioManager.js?v=1.1"></script>
     <script src="js/Confetti.js?v=1.1"></script>
     <script src="js/config.js?v=1.1"></script>
+    <script src="js/theme-selector.js?v=1.0"></script>
     <script src="js/game-logic.js?v=2.3"></script>
     <script src="js/api.js?v=1.1"></script>
     <script src="js/stats-manager.js?v=1.3"></script>
