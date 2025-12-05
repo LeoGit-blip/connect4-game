@@ -126,9 +126,11 @@ class App {
             console.log('Creating configured game...');
             console.log('Config:', this.gameConfig);
 
-            // Apply theme
-            if (this.gameConfig.theme) {
-                document.body.setAttribute('data-theme', this.gameConfig.theme);
+            // Apply theme from global theme selector (localStorage)
+            // Don't override with gameConfig.theme to respect user's global theme choice
+            const savedTheme = localStorage.getItem('connect4-theme');
+            if (savedTheme) {
+                document.body.setAttribute('data-theme', savedTheme);
             }
 
             // Build config request
