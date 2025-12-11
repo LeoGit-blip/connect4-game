@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/multiplayer.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -90,6 +91,45 @@
                         </div>
                         <h3>Player vs AI</h3>
                         <p>Test your skills against the computer</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="aivai">
+                        <div class="mode-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                                <circle cx="16" cy="7" r="4" />
+                                <path d="M16 11h2a4 4 0 0 1 4 4v2" />
+                            </svg>
+                        </div>
+                        <h3>AI vs AI</h3>
+                        <p>Watch two Grandmaster AIs battle</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="multiplayer-create">
+                        <div class="mode-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </div>
+                        <h3>Create Room</h3>
+                        <p>Host a multiplayer game online</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="multiplayer-join">
+                        <div class="mode-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                                <polyline points="10 17 15 12 10 7" />
+                                <line x1="15" y1="12" x2="3" y2="12" />
+                            </svg>
+                        </div>
+                        <h3>Join Room</h3>
+                        <p>Join a friend's game with code</p>
                     </div>
 
                     <div class="mode-card" id="statsCard">
@@ -371,13 +411,20 @@
         </main>
 
         <footer class="menu-footer">
-            <p>Connect 4 v1.1 - Enhanced Edition</p>
+            <p>Connect 4 v1.3 - Multiplayer Edition</p>
         </footer>
     </div>
 
+    <!-- WebSocket Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+
+    <!-- Game Scripts -->
     <script src="js/config.js?v=1.2"></script>
     <script src="js/stats-manager.js?v=1.2"></script>
     <script src="js/theme-selector.js?v=1.0"></script>
+    <script src="js/ws-client.js?v=1.3"></script>
+    <script src="js/multiplayer-ui.js?v=1.3"></script>
     <script src="js/menu.js?v=1.4"></script>
 </body>
 

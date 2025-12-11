@@ -9,6 +9,7 @@ class App {
         this.currentGameState = null;
         this.gameConfig = null;
         this.moveInProgress = false; // Prevent spam clicking
+        this.isMultiplayer = false; // Track multiplayer mode
     }
 
     /**
@@ -17,6 +18,30 @@ class App {
     async init() {
         console.log('Initializing Connect 4 Game...');
 
+        // Check if this is a multiplayer game
+        const isMultiplayer = sessionStorage.getItem('multiplayerMode') === 'true';
+
+        if (isMultiplayer) {
+            console.log('Multiplayer mode detected!');
+            this.isMultiplayer = true;
+
+            // Initialize UI
+            gameUI.initBoard();
+            this.setupEventListeners();
+
+            // Initialize multiplayer game
+            try {
+                await multiplayerGame.init();
+                console.log('Multiplayer game initialized');
+            } catch (error) {
+                console.error('Failed to initialize multiplayer:', error);
+                alert('Failed to connect to multiplayer game. Returning to menu.');
+                window.location.href = 'index.html';
+            }
+            return;
+        }
+
+        // Regular single-player/AI game initialization
         // Check for configuration from menu
         const urlParams = new URLSearchParams(window.location.search);
         const configParam = urlParams.get('config');
@@ -77,8 +102,45 @@ class App {
         // Back to menu button
         const menuBtn = document.getElementById('menuBtn');
         if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-                window.audioManager.playButtonClick();
+            menuBtn.addEventListener('click', (e) => {
+                if (window.audioManager) window.audioManager.playButtonClick();
+
+                // Check if in multiplayer mode
+                const isMultiplayer = sessionStorage.getItem('multiplayerMode') === 'true';
+
+                if (isMultiplayer) {
+                    // Prevent default navigation
+                    e.preventDefault();
+
+                    this.showCustomConfirm(
+                        'Leave Game?',
+                        'Are you sure you want to leave? The game will be ended.',
+                        () => {
+                            // On Confirm
+                            if (typeof multiplayerGame !== 'undefined') {
+                                // Try to leave room politely 
+                                if (multiplayerGame.roomCode && multiplayerGame.wsClient && multiplayerGame.wsClient.connected) {
+                                    console.log('Sending leave request before exit');
+                                    multiplayerGame.wsClient.leaveRoom(multiplayerGame.roomCode, multiplayerGame.playerName);
+                                }
+                                multiplayerGame.cleanup();
+                            }
+                            sessionStorage.removeItem('multiplayerMode');
+
+                            // Give the socket a moment to send the leave message before redirecting
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 500);
+                        }
+                    );
+                    return;
+                }
+
+                // Standard Exit
+                if (typeof multiplayerGame !== 'undefined') {
+                    multiplayerGame.cleanup();
+                }
+                sessionStorage.removeItem('multiplayerMode');
                 window.location.href = 'index.html';
             });
         }
@@ -103,8 +165,46 @@ class App {
         // Back to menu button in modal
         const backToMenuBtn = document.getElementById('backToMenuBtn');
         if (backToMenuBtn) {
-            backToMenuBtn.addEventListener('click', () => {
-                window.audioManager.playButtonClick();
+            backToMenuBtn.addEventListener('click', (e) => {
+                if (window.audioManager) window.audioManager.playButtonClick();
+
+                // Check if in multiplayer mode
+                const isMultiplayer = sessionStorage.getItem('multiplayerMode') === 'true';
+
+                if (isMultiplayer) {
+                    // Prevent default navigation if needed (though it's a button)
+                    e.preventDefault();
+
+                    this.showCustomConfirm(
+                        'Leave Game?',
+                        'Are you sure you want to leave? The game will be ended.',
+                        () => {
+                            // On Confirm
+                            if (typeof multiplayerGame !== 'undefined') {
+                                // Try to leave room politely 
+                                if (multiplayerGame.roomCode && multiplayerGame.wsClient && multiplayerGame.wsClient.connected) {
+                                    console.log('Sending leave request before exit');
+                                    multiplayerGame.wsClient.leaveRoom(multiplayerGame.roomCode, multiplayerGame.playerName);
+                                }
+                                multiplayerGame.cleanup();
+                            }
+                            sessionStorage.removeItem('multiplayerMode');
+
+                            // Give the socket a moment to send the leave message before redirecting
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 500);
+                        }
+                    );
+                    return;
+                }
+
+                // Standard Exit
+                // Cleanup multiplayer session if it exists (safety check)
+                if (typeof multiplayerGame !== 'undefined') {
+                    multiplayerGame.cleanup();
+                }
+                sessionStorage.removeItem('multiplayerMode');
                 window.location.href = 'index.html';
             });
         }
@@ -161,6 +261,117 @@ class App {
     }
 
     /**
+     * Show a high-fidelity alert modal
+     * @param {string} title 
+     * @param {string} message 
+     * @param {Function} callback 
+     */
+    showCustomAlert(title, message, callback) {
+        // Remove any existing modal
+        const existing = document.getElementById('customAlertModal');
+        if (existing) existing.remove();
+
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'custom-modal';
+        modalOverlay.id = 'customAlertModal';
+
+        // Warning/Info Icon SVG
+        const iconSvg = `
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        `;
+
+        modalOverlay.innerHTML = `
+            <div class="custom-modal-content">
+                <div class="custom-modal-icon">
+                    ${iconSvg}
+                </div>
+                <h3 class="custom-modal-title">${title}</h3>
+                <p class="custom-modal-message">${message}</p>
+                <button class="custom-modal-btn" id="modalOkBtn">Got it</button>
+            </div>
+        `;
+
+        const btn = modalOverlay.querySelector('#modalOkBtn');
+        btn.addEventListener('click', () => {
+            // Animate out
+            modalOverlay.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.remove();
+                if (callback) callback();
+            }, 300);
+        });
+
+        document.body.appendChild(modalOverlay);
+    }
+
+    /**
+     * Show a high-fidelity confirmation modal
+     * @param {string} title 
+     * @param {string} message 
+     * @param {Function} onConfirm 
+     * @param {Function} onCancel 
+     */
+    showCustomConfirm(title, message, onConfirm, onCancel) {
+        // Remove any existing modal
+        const existing = document.getElementById('customAlertModal');
+        if (existing) existing.remove();
+
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'custom-modal';
+        modalOverlay.id = 'customAlertModal';
+
+        // Question/Info Icon SVG
+        const iconSvg = `
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        `;
+
+        modalOverlay.innerHTML = `
+            <div class="custom-modal-content">
+                <div class="custom-modal-icon" style="color: var(--color-accent-blue);">
+                    ${iconSvg}
+                </div>
+                <h3 class="custom-modal-title">${title}</h3>
+                <p class="custom-modal-message">${message}</p>
+                <div class="custom-modal-actions" style="display: flex; gap: 1rem; width: 100%;">
+                    <button class="custom-modal-btn secondary" id="modalCancelBtn" style="background: transparent; border: 2px solid var(--color-border); color: var(--color-text-primary);">Cancel</button>
+                    <button class="custom-modal-btn primary" id="modalConfirmBtn" style="background: var(--gradient-danger);">Yes, Leave</button>
+                </div>
+            </div>
+        `;
+
+        const cancelBtn = modalOverlay.querySelector('#modalCancelBtn');
+        const confirmBtn = modalOverlay.querySelector('#modalConfirmBtn');
+
+        cancelBtn.addEventListener('click', () => {
+            // Animate out
+            modalOverlay.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.remove();
+                if (onCancel) onCancel();
+            }, 300);
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            // Animate out
+            modalOverlay.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.remove();
+                if (onConfirm) onConfirm();
+            }, 300);
+        });
+
+        document.body.appendChild(modalOverlay);
+    }
+
+    /**
      * Creates a configured game
      */
     async createConfiguredGame() {
@@ -201,9 +412,18 @@ class App {
 
             console.log('Configured game created:', response.gameId);
             console.log('Is AI turn?', response.isAITurn);
+            console.log('Is AI vs AI?', this.gameConfig.isAIvsAI);
 
-            // If AI starts first, make AI move
-            if (response.isAITurn) {
+            // If AI vs AI mode, start auto-play
+            if (this.gameConfig.isAIvsAI) {
+                console.log('AI vs AI mode detected - starting auto-play');
+                // Start auto-play after a short delay
+                setTimeout(() => {
+                    this.startAIvsAIAutoPlay();
+                }, 1000);
+            }
+            // If AI starts first in regular AI mode, make AI move
+            else if (response.isAITurn) {
                 console.log('AI starts first!');
                 await this.handleAITurn();
             }
@@ -218,6 +438,24 @@ class App {
      * @param {number} columnIndex - Column that was clicked
      */
     async handleColumnClick(columnIndex) {
+        // Handle multiplayer moves
+        if (this.isMultiplayer) {
+            console.log('Handling multiplayer move for column:', columnIndex);
+            this.moveInProgress = true;
+
+            const success = await multiplayerGame.makeMove(columnIndex);
+
+            if (!success) {
+                console.log('Multiplayer move failed or not your turn');
+                this.moveInProgress = false;
+                gameUI.enableBoard();
+            }
+            // On success, keep moveInProgress = true until server responds
+            // The opponent move handler will reset it when the board updates
+            return;
+        }
+
+        // Regular single-player/AI game logic
         // Prevent spam clicking - check if move is already in progress
         if (this.moveInProgress) {
             console.log('Move already in progress, ignoring click');
@@ -321,6 +559,53 @@ class App {
             gameUI.enableBoard();
             alert('AI move failed: ' + error.message);
         }
+    }
+
+    /**
+     * Starts AI vs AI auto-play mode
+     */
+    async startAIvsAIAutoPlay() {
+        console.log('Starting AI vs AI auto-play mode...');
+
+        // Disable board interaction for spectator mode
+        gameUI.disableBoard();
+
+        // Continuously make AI moves until game ends
+        while (this.currentGameState && this.currentGameState.status === 'IN_PROGRESS') {
+            try {
+                // Wait for configured delay
+                const delay = this.gameConfig.autoPlaySpeed || 1000;
+                await this.sleep(delay);
+
+                // Show AI thinking indicator
+                gameUI.showAIThinking();
+                window.audioManager.playAIThinking();
+
+                // Make AI move
+                const response = await apiClient.executeAIMove(this.currentGameId);
+
+                gameUI.hideAIThinking();
+
+                if (response.success) {
+                    await this.handleMoveResponse(response);
+
+                    // Refresh game state
+                    const gameState = await apiClient.getGame(this.currentGameId);
+                    this.currentGameState = gameState;
+
+                    console.log('AI vs AI move completed. Status:', gameState.status);
+                } else {
+                    console.error('AI move failed');
+                    break;
+                }
+            } catch (error) {
+                console.error('Error in AI vs AI auto-play:', error);
+                gameUI.hideAIThinking();
+                break;
+            }
+        }
+
+        console.log('AI vs AI game ended. Final status:', this.currentGameState.status);
     }
 
     /**
@@ -442,5 +727,7 @@ class App {
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     const app = new App();
+    // Expose app globally so multiplayer game can reset moveInProgress
+    window.app = app;
     app.init();
 });

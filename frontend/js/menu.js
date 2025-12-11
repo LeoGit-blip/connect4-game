@@ -283,6 +283,15 @@ class MenuController {
    * Handles game mode selection
    */
   handleGameModeSelection(mode) {
+    // Handle multiplayer modes
+    if (mode === 'multiplayer-create') {
+      multiplayerUI.showCreateRoomDialog();
+      return;
+    } else if (mode === 'multiplayer-join') {
+      multiplayerUI.showJoinRoomDialog();
+      return;
+    }
+
     this.selectedMode = mode;
 
     // Update UI
@@ -310,12 +319,24 @@ class MenuController {
       this.firstPlayerContainer.classList.remove("hidden");
       // Update first player dropdown for PvP mode
       this.updateFirstPlayerOptions(mode);
+    } else if (mode === "aivai") {
+      // AI vs AI mode - hide all player configuration
+      this.player2Setup.classList.add("hidden");
+      this.aiSetup.classList.add("hidden");
+      this.firstPlayerContainer.classList.add("hidden");
+      // Hide player name inputs for AI vs AI
+      const player1Setup = document.getElementById("player1Setup");
+      if (player1Setup) player1Setup.style.display = "none";
     } else {
+      // Player vs AI mode
       this.player2Setup.classList.add("hidden");
       this.aiSetup.classList.remove("hidden");
       this.firstPlayerContainer.classList.remove("hidden");
       // Update first player dropdown for PvAI mode
       this.updateFirstPlayerOptions(mode);
+      // Show player 1 setup
+      const player1Setup = document.getElementById("player1Setup");
+      if (player1Setup) player1Setup.style.display = "";
     }
   }
 
@@ -420,6 +441,11 @@ class MenuController {
    * Validates configuration
    */
   validateConfiguration() {
+    // Skip validation for AI vs AI mode
+    if (this.selectedMode === "aivai") {
+      return true;
+    }
+
     const player1Name = this.player1Name.value.trim();
     if (!player1Name) {
       alert("Please enter a name for Player 1");
@@ -452,8 +478,14 @@ class MenuController {
    * Builds configuration object
    */
   buildConfiguration() {
-    const gameMode =
-      this.selectedMode === "pvp" ? "PLAYER_VS_PLAYER" : "PLAYER_VS_AI";
+    let gameMode;
+    if (this.selectedMode === "pvp") {
+      gameMode = "PLAYER_VS_PLAYER";
+    } else if (this.selectedMode === "aivai") {
+      gameMode = "AI_VS_AI";
+    } else {
+      gameMode = "PLAYER_VS_AI";
+    }
 
     // Map colors to hex values
     const colorMap = {
@@ -474,10 +506,15 @@ class MenuController {
     }
 
     // Handle random first player selection
-    let firstPlayer = this.firstPlayer.value;
+    let firstPlayer = this.firstPlayer ? this.firstPlayer.value : "RANDOM";
 
+    // In AI vs AI mode, random start
+    if (this.selectedMode === "aivai") {
+      firstPlayer = Math.random() < 0.5 ? "RED" : "YELLOW";
+      console.log("AI vs AI Mode: Random first player selected:", firstPlayer);
+    }
     // In AI mode, always random start
-    if (this.selectedMode === "pvai") {
+    else if (this.selectedMode === "pvai") {
       firstPlayer = Math.random() < 0.5 ? "RED" : "YELLOW";
       console.log("AI Mode: Random first player selected:", firstPlayer);
     }
@@ -490,21 +527,27 @@ class MenuController {
     const config = {
       gameMode: gameMode,
       player1: {
-        name: this.player1Name.value.trim(),
+        name: this.selectedMode === "aivai" ? "AI Grandmaster 1" : this.player1Name.value.trim(),
         color: colorMap[this.player1Color],
-        isAI: false,
+        isAI: this.selectedMode === "aivai",
       },
       player2: {
         name:
           this.selectedMode === "pvp"
             ? this.player2Name.value.trim()
-            : "Computer",
+            : this.selectedMode === "aivai"
+              ? "AI Grandmaster 2"
+              : "Computer",
         color: colorMap[aiColor],
-        isAI: this.selectedMode === "pvai",
+        isAI: this.selectedMode === "pvai" || this.selectedMode === "aivai",
       },
-      aiDifficulty: this.selectedDifficulty,
+      aiDifficulty: this.selectedMode === "aivai" ? "GRANDMASTER" : this.selectedDifficulty,
+      ai1Difficulty: this.selectedMode === "aivai" ? "GRANDMASTER" : null,
+      ai2Difficulty: this.selectedMode === "aivai" ? "GRANDMASTER" : null,
       firstPlayer: firstPlayer,
-      theme: this.theme.value,
+      theme: this.theme ? this.theme.value : "classic",
+      isAIvsAI: this.selectedMode === "aivai",
+      autoPlaySpeed: 1000, // 1 second delay between moves
     };
 
     return config;

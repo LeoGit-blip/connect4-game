@@ -145,22 +145,34 @@ class GameUI {
      * @param {Array} board - 2D array of player states
      */
     renderBoard(board) {
-        if (!board) return;
+        console.log('Rendering board:', board);
+
+        if (!board) {
+            console.warn('renderBoard called with null/undefined board');
+            return;
+        }
 
         for (let row = 0; row < 6; row++) {
             for (let col = 0; col < 7; col++) {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                if (!cell) continue;
+                if (!cell) {
+                    console.warn(`Cell not found: row ${row}, col ${col}`);
+                    continue;
+                }
 
                 // Clear existing piece
                 cell.innerHTML = '';
 
                 const player = board[row][col];
-                if (player && player !== 'NONE') {
+                console.log(`Board[${row}][${col}] = ${player}`);
+
+                // Check if cell is occupied (handle both 'NONE' string and null)
+                if (player && player !== 'NONE' && player !== null) {
                     const piece = document.createElement('div');
                     const colorClass = this.getPlayerColorClass(player);
                     piece.className = `piece ${colorClass}`;
                     cell.appendChild(piece);
+                    console.log(`Placed ${colorClass} piece at [${row}][${col}]`);
                 }
             }
         }
@@ -174,7 +186,10 @@ class GameUI {
      */
     animatePieceDrop(column, row, player) {
         const cell = document.querySelector(`[data-row="${row}"][data-col="${column}"]`);
-        if (!cell) return;
+        if (!cell) {
+            console.warn(`Cell not found for animation: row ${row}, col ${column}`);
+            return;
+        }
 
         const piece = document.createElement('div');
         const colorClass = this.getPlayerColorClass(player);
@@ -187,10 +202,16 @@ class GameUI {
      * @param {string} player - Current player
      */
     updateCurrentPlayer(player) {
-        if (!player || player === 'NONE') return;
+        if (!player || player === 'NONE') {
+            console.warn('updateCurrentPlayer called with invalid player:', player);
+            return;
+        }
 
         const colorClass = this.getPlayerColorClass(player);
         const playerName = this.playerNames[player] || (player === 'RED' ? 'Player 1' : 'Player 2');
+
+        console.log(`Updating current player to: ${playerName} (${colorClass})`);
+
         this.currentPlayerText.textContent = `${playerName}'s Turn`;
 
         // Update badge styling - remove all color classes first
@@ -322,7 +343,8 @@ class GameUI {
         const columns = this.boardElement.querySelectorAll('.column');
         columns.forEach((col, index) => {
             // Check if top cell is filled
-            const isColumnFull = board[0][index] !== 'NONE';
+            const topCell = board[0][index];
+            const isColumnFull = topCell && topCell !== 'NONE' && topCell !== null;
             if (isColumnFull) {
                 col.classList.add('disabled');
             } else {
