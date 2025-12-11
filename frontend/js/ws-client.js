@@ -36,7 +36,12 @@ class WebSocketClient {
     connect(onConnected, onError) {
         this.updateConnectionStatus('connecting', 'Connecting to server...');
 
-        const socket = new SockJS('http://localhost:8080/ws');
+        // Use environment-specific URL
+        const wsUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:8080/ws'
+            : 'https://YOUR_BACKEND_URL.up.railway.app/ws'; // Replace with your actual backend URL
+
+        const socket = new SockJS(wsUrl);
         // Use StompJs.Stomp from the CDN library
         this.stompClient = StompJs.Stomp.over(socket);
 
