@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "description": "A beautiful Connect 4 game with AI opponent",
     "scripts": {
-        "start": "serve frontend"
+        "start": "serve frontend -l $PORT",
+        "build": "echo 'No build step needed'"
     },
     "dependencies": {
         "serve": "^14.2.1"
