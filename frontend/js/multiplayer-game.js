@@ -493,25 +493,6 @@ class MultiplayerGame {
             this.currentBoard = response.board;
             const convertedBoard = this.convertBoard(response.board);
             gameUI.renderBoard(convertedBoard);
-
-            // Animate the final move if we have the move data
-            if (response.column !== undefined && response.player) {
-                const rowIndex = this.findRow(response.board, response.column);
-                console.log('Animating final winning move at column', response.column, 'row', rowIndex);
-                gameUI.animatePieceDrop(
-                    response.column,
-                    rowIndex,
-                    response.player
-                );
-
-                // Play piece drop sound
-                if (window.audioManager) {
-                    window.audioManager.playPieceDrop();
-                }
-
-                // Wait for animation to complete
-                await this.sleep(500);
-            }
         }
 
         gameUI.isGameActive = false;
