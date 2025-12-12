@@ -39,7 +39,7 @@ class WebSocketClient {
         // Use environment-specific URL
         const wsUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:8080/ws'
-            : 'https://YOUR_BACKEND_URL.up.railway.app/ws'; // Replace with your actual backend URL
+            : 'https://connect4-game-backend.up.railway.app/ws';
 
         const socket = new SockJS(wsUrl);
         // Use StompJs.Stomp from the CDN library
