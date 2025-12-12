@@ -494,6 +494,22 @@ class MultiplayerGame {
             const convertedBoard = this.convertBoard(response.board);
             gameUI.renderBoard(convertedBoard);
 
+            // CRITICAL: Add final move to history if this is opponent's winning move
+            // The player who made the move already added it optimistically
+            // But the opponent needs to see it in their history
+            if (response.column !== undefined && response.player) {
+                const playerColor = this.isHost ? 'RED' : 'YELLOW';
+                // Only add if this was opponent's move (not our own)
+                if (response.player !== playerColor) {
+                    const moveNumber = this.calculateMoveNumber(response.board);
+                    gameUI.addMoveToHistory({
+                        column: response.column,
+                        player: response.player
+                    }, moveNumber);
+                    console.log('Added final winning move to opponent history');
+                }
+            }
+
             // Highlight winning line if present
             if (response.winningLine && response.winningLine.length > 0) {
                 console.log('Highlighting winning line:', response.winningLine);
