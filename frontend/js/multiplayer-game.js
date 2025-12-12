@@ -493,6 +493,23 @@ class MultiplayerGame {
             this.currentBoard = response.board;
             const convertedBoard = this.convertBoard(response.board);
             gameUI.renderBoard(convertedBoard);
+
+            // Highlight winning line if present
+            if (response.winningLine && response.winningLine.length > 0) {
+                console.log('Highlighting winning line:', response.winningLine);
+                response.winningLine.forEach(pos => {
+                    const [row, col] = pos;
+                    // Find the cell and add winning class to the piece
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        const piece = cell.querySelector('.piece');
+                        if (piece) {
+                            piece.classList.add('winning');
+                            console.log(`Added winning class to piece at [${row}, ${col}]`);
+                        }
+                    }
+                });
+            }
         }
 
         gameUI.isGameActive = false;

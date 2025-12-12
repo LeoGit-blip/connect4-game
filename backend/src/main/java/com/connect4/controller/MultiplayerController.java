@@ -14,7 +14,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -254,7 +256,8 @@ public class MultiplayerController {
             log.info("Placed {} at row {}, column {}", movingPlayer, row, column);
 
             // Check for win or draw
-            if (checkWin(game.getBoard().getGrid(), row, column, movingPlayer)) {
+            List<int[]> winningLine = checkWin(game.getBoard().getGrid(), row, column, movingPlayer);
+            if (!winningLine.isEmpty()) {
                 log.info("Player {} won!", movingPlayer);
                 game.setStatus(movingPlayer == Player.RED ? GameStatus.RED_WINS : GameStatus.YELLOW_WINS);
             } else if (checkDraw(game.getBoard().getGrid())) {
@@ -276,6 +279,11 @@ public class MultiplayerController {
             response.put("board", game.getBoard().getGrid());
             response.put("currentPlayer", game.getCurrentPlayer());
             response.put("gameStatus", game.getStatus());
+
+            // Add winning line if game is won
+            if (!winningLine.isEmpty()) {
+                response.put("winningLine", winningLine);
+            }
 
             log.info("Sending MOVE_MADE response: player={}, currentPlayer={}",
                     movingPlayer, game.getCurrentPlayer());
@@ -308,53 +316,82 @@ public class MultiplayerController {
 
     /**
      * Check if a move results in a win
+     * 
+     * @return List of winning positions [row, col] if win detected, empty list
+     *         otherwise
      */
-    private boolean checkWin(Player[][] board, int row, int col, Player player) {
+    private List<int[]> checkWin(Player[][] board, int row, int col, Player player) {
+        List<int[]> winningPositions = new ArrayList<>();
+
         // Check horizontal
         int count = 0;
+        int startCol = -1;
         for (int c = 0; c < board[0].length; c++) {
-            if (board[row][c] == player)
+            if (board[row][c] == player) {
+                if (count == 0)
+                    startCol = c;
                 count++;
-            else
+            } else {
                 count = 0;
-            if (count >= 4)
-                return true;
+            }
+            if (count >= 4) {
+                for (int i = 0; i < 4; i++) {
+                    winningPositions.add(new int[] { row, startCol + i });
+                }
+                return winningPositions;
+            }
         }
 
         // Check vertical
         count = 0;
+        int startRow = -1;
         for (int r = 0; r < board.length; r++) {
-            if (board[r][col] == player)
+            if (board[r][col] == player) {
+                if (count == 0)
+                    startRow = r;
                 count++;
-            else
+            } else {
                 count = 0;
-            if (count >= 4)
-                return true;
+            }
+            if (count >= 4) {
+                for (int i = 0; i < 4; i++) {
+                    winningPositions.add(new int[] { startRow + i, col });
+                }
+                return winningPositions;
+            }
         }
 
-        // Check diagonal /
+        // Check diagonal / (bottom-left to top-right)
         for (int r = 3; r < board.length; r++) {
             for (int c = 0; c < board[0].length - 3; c++) {
                 if (board[r][c] == player &&
                         board[r - 1][c + 1] == player &&
                         board[r - 2][c + 2] == player &&
-                        board[r - 3][c + 3] == player)
-                    return true;
+                        board[r - 3][c + 3] == player) {
+                    for (int i = 0; i < 4; i++) {
+                        winningPositions.add(new int[] { r - i, c + i });
+                    }
+                    return winningPositions;
+                }
             }
         }
 
-        // Check diagonal \
+        // Check diagonal \ (top-left to bottom-right)
         for (int r = 0; r < board.length - 3; r++) {
             for (int c = 0; c < board[0].length - 3; c++) {
                 if (board[r][c] == player &&
                         board[r + 1][c + 1] == player &&
                         board[r + 2][c + 2] == player &&
-                        board[r + 3][c + 3] == player)
-                    return true;
+                        board[r + 3][c + 3] == player) {
+                    for (int i = 0; i < 4; i++) {
+                        winningPositions.add(new int[] { r + i, c + i });
+                    }
+                    return winningPositions;
+                }
             }
         }
 
-        return false;
+        return winningPositions; // Empty list if no win
     }
 
     /**
